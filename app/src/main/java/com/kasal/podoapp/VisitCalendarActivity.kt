@@ -34,9 +34,7 @@ class VisitCalendarActivity : AppCompatActivity() {
         val buttonPickDate = findViewById<Button>(R.id.buttonPickDate)
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewDayVisits)
 
-        adapter = VisitForDayAdapter { visit ->
-            openPatientProfile(visit)
-        }
+        adapter = VisitForDayAdapter { visit -> openPatientProfile(visit) }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -60,11 +58,22 @@ class VisitCalendarActivity : AppCompatActivity() {
         }
     }
 
+    private fun dayBoundsMillis(date: String): Pair<Long, Long> {
+        val parts = date.split("-")
+        val y = parts.getOrNull(0)?.toIntOrNull() ?: 1970
+        val m0 = (parts.getOrNull(1)?.toIntOrNull() ?: 1) - 1
+        val d = parts.getOrNull(2)?.toIntOrNull() ?: 1
+        val start = Calendar.getInstance().apply { set(y, m0, d, 0, 0, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+        val end = Calendar.getInstance().apply { set(y, m0, d, 23, 59, 59); set(Calendar.MILLISECOND, 999) }.timeInMillis
+        return start to end
+    }
+
     private fun loadVisitsForDate(date: String) {
         CoroutineScope(Dispatchers.IO).launch {
+            val (start, end) = dayBoundsMillis(date)
             PodologiaDatabase.getDatabase(this@VisitCalendarActivity)
                 .visitDao()
-                .getVisitsForDate(date)
+                .getVisitsForDate(start, end)
                 .collect { visits ->
                     withContext(Dispatchers.Main) {
                         adapter.submitList(visits)
@@ -100,7 +109,7 @@ class VisitCalendarActivity : AppCompatActivity() {
         return try {
             val parsed = inputFormat.parse(date)
             outputFormat.format(parsed!!)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             date
         }
     }

@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.Visit
+import com.kasal.podoapp.data.reason
+import com.kasal.podoapp.data.diagnosis
+import com.kasal.podoapp.data.photoUris
 
 class VisitForDayAdapter(
     private val onVisitClick: (Visit) -> Unit
@@ -42,7 +45,7 @@ class VisitForDayAdapter(
             diagnosisText.text = "Διάγνωση: ${visit.diagnosis ?: "-"}"
             notesText.text = "Σημειώσεις: ${visit.notes ?: "-"}"
 
-            val photos = visit.photoUris ?: emptyList()
+            val photos = visit.photoUris
             if (photos.isNotEmpty()) {
                 photoRecycler.visibility = View.VISIBLE
                 photoRecycler.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
@@ -51,9 +54,7 @@ class VisitForDayAdapter(
                 photoRecycler.visibility = View.GONE
             }
 
-            itemView.setOnClickListener {
-                onVisitClick(visit)
-            }
+            itemView.setOnClickListener { onVisitClick(visit) }
         }
     }
 }

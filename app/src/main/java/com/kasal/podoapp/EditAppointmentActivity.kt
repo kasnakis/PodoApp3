@@ -18,7 +18,6 @@ class EditAppointmentActivity : AppCompatActivity() {
 
     private lateinit var editTextDate: EditText
     private lateinit var editTextTime: EditText
-    private lateinit var editTextType: EditText
     private lateinit var editTextStatus: EditText
     private lateinit var editTextNotes: EditText
     private lateinit var buttonUpdate: Button
@@ -26,25 +25,26 @@ class EditAppointmentActivity : AppCompatActivity() {
     private val calendar = Calendar.getInstance()
     private lateinit var appointment: Appointment
 
+    private val dateFmt = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_appointment)
 
         editTextDate = findViewById(R.id.editTextDate)
         editTextTime = findViewById(R.id.editTextTime)
-        editTextType = findViewById(R.id.editTextType)
         editTextStatus = findViewById(R.id.editTextStatus)
         editTextNotes = findViewById(R.id.editTextNotes)
         buttonUpdate = findViewById(R.id.buttonUpdateAppointment)
 
-        // Get Appointment from intent
+        // Προσοχή: το Appointment πρέπει να είναι Serializable/Parcelable.
         appointment = intent.getSerializableExtra("appointment") as Appointment
 
-        // Fill fields
-        val parts = appointment.datetime.split(" ")
-        editTextDate.setText(parts.getOrNull(0) ?: "")
-        editTextTime.setText(parts.getOrNull(1) ?: "")
-        editTextType.setText(appointment.type ?: "")
+        // Fill fields από dateTime (Long)
+        val whenDate = Date(appointment.dateTime)
+        editTextDate.setText(dateFmt.format(whenDate))
+        editTextTime.setText(timeFmt.format(whenDate))
         editTextStatus.setText(appointment.status)
         editTextNotes.setText(appointment.notes ?: "")
 
@@ -54,7 +54,6 @@ class EditAppointmentActivity : AppCompatActivity() {
         buttonUpdate.setOnClickListener {
             val date = editTextDate.text.toString()
             val time = editTextTime.text.toString()
-            val type = editTextType.text.toString()
             val status = editTextStatus.text.toString()
             val notes = editTextNotes.text.toString()
 
@@ -63,9 +62,18 @@ class EditAppointmentActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // Parse σε millis
+            val datetimeMillis = try {
+                val combined = "$date $time"
+                val parser = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                parser.parse(combined)!!.time
+            } catch (_: Exception) {
+                Toast.makeText(this, "Μη έγκυρη ημερομηνία/ώρα", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val updated = appointment.copy(
-                datetime = "$date $time",
-                type = if (type.isBlank()) null else type,
+                dateTime = datetimeMillis,
                 status = status,
                 notes = if (notes.isBlank()) null else notes
             )
@@ -87,8 +95,7 @@ class EditAppointmentActivity : AppCompatActivity() {
         DatePickerDialog(this,
             { _, y, m, d ->
                 calendar.set(y, m, d)
-                val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                editTextDate.setText(format.format(calendar.time))
+                editTextDate.setText(dateFmt.format(calendar.time))
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -101,8 +108,7 @@ class EditAppointmentActivity : AppCompatActivity() {
             { _, h, m ->
                 calendar.set(Calendar.HOUR_OF_DAY, h)
                 calendar.set(Calendar.MINUTE, m)
-                val format = SimpleDateFormat("HH:mm", Locale.getDefault())
-                editTextTime.setText(format.format(calendar.time))
+                editTextTime.setText(timeFmt.format(calendar.time))
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),

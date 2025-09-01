@@ -13,6 +13,7 @@ import java.util.*
 class AppointmentForDayAdapter : RecyclerView.Adapter<AppointmentForDayAdapter.AppointmentViewHolder>() {
 
     private var items: List<Pair<Appointment, String>> = emptyList()
+    private val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     fun submitList(data: List<Pair<Appointment, String>>) {
         items = data
@@ -27,7 +28,7 @@ class AppointmentForDayAdapter : RecyclerView.Adapter<AppointmentForDayAdapter.A
 
     override fun onBindViewHolder(holder: AppointmentViewHolder, position: Int) {
         val (appointment, fullName) = items[position]
-        holder.bind(appointment, fullName)
+        holder.bind(appointment, fullName, timeFmt)
     }
 
     override fun getItemCount(): Int = items.size
@@ -38,22 +39,11 @@ class AppointmentForDayAdapter : RecyclerView.Adapter<AppointmentForDayAdapter.A
         private val textTime: TextView = itemView.findViewById(R.id.textAppointmentTime)
         private val textNotes: TextView = itemView.findViewById(R.id.textAppointmentNotes)
 
-        fun bind(appointment: Appointment, fullName: String) {
+        fun bind(appointment: Appointment, fullName: String, fmt: SimpleDateFormat) {
             textPatientName.text = "Όνομα: $fullName"
-            textType.text = "Τύπος: ${appointment.type ?: "-"}"
-            textTime.text = "Ώρα: ${extractTime(appointment.datetime)}"
+            textType.text = "Κατάσταση: ${appointment.status}"
+            textTime.text = "Ώρα: ${fmt.format(Date(appointment.dateTime))}"
             textNotes.text = "Σημειώσεις: ${appointment.notes ?: "-"}"
-        }
-
-        private fun extractTime(datetime: String): String {
-            return try {
-                val parser = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                val date = parser.parse(datetime)
-                val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
-                formatter.format(date!!)
-            } catch (e: Exception) {
-                "-"
-            }
         }
     }
 }

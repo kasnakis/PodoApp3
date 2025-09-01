@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.Visit
+import com.kasal.podoapp.data.reason
+import com.kasal.podoapp.data.diagnosis
+import com.kasal.podoapp.data.photoUris
 
 class VisitAdapter(
     private val onVisitAction: (Visit, ActionType) -> Unit
@@ -47,7 +50,7 @@ class VisitAdapter(
             treatmentText.text = "Θεραπεία: ${visit.treatment ?: "-"}"
             notesText.text = "Σημειώσεις: ${visit.notes ?: "-"}"
 
-            val photos = visit.photoUris ?: emptyList()
+            val photos = visit.photoUris
             if (photos.isNotEmpty()) {
                 recyclerViewPhotos.visibility = View.VISIBLE
                 recyclerViewPhotos.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
@@ -56,17 +59,10 @@ class VisitAdapter(
                 recyclerViewPhotos.visibility = View.GONE
             }
 
-            buttonEdit.setOnClickListener {
-                onVisitAction(visit, ActionType.EDIT)
-            }
-
-            buttonDelete.setOnClickListener {
-                onVisitAction(visit, ActionType.DELETE)
-            }
+            buttonEdit.setOnClickListener { onVisitAction(visit, ActionType.EDIT) }
+            buttonDelete.setOnClickListener { onVisitAction(visit, ActionType.DELETE) }
         }
     }
 
-    enum class ActionType {
-        EDIT, DELETE
-    }
+    enum class ActionType { EDIT, DELETE }
 }

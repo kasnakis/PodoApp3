@@ -23,7 +23,7 @@ class NewAppointmentActivity : AppCompatActivity() {
     private lateinit var buttonSave: Button
 
     private val calendar = Calendar.getInstance()
-    private var patientId: Int = 0 // default = 0 (αν δεν έρχεται από προφίλ)
+    private var patientId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,15 +35,12 @@ class NewAppointmentActivity : AppCompatActivity() {
         editTextNotes = findViewById(R.id.editTextNotes)
         buttonSave = findViewById(R.id.buttonSaveAppointment)
 
-        // Αν έρχεται από καρτέλα ασθενούς, πάρε το patientId
         patientId = intent.getIntExtra("patientId", 0)
 
         editTextDate.setOnClickListener { showDatePicker() }
         editTextTime.setOnClickListener { showTimePicker() }
 
-        buttonSave.setOnClickListener {
-            saveAppointment()
-        }
+        buttonSave.setOnClickListener { saveAppointment() }
     }
 
     private fun showDatePicker() {
@@ -51,7 +48,6 @@ class NewAppointmentActivity : AppCompatActivity() {
             calendar.set(Calendar.YEAR, y)
             calendar.set(Calendar.MONTH, m)
             calendar.set(Calendar.DAY_OF_MONTH, d)
-
             val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             editTextDate.setText(formatter.format(calendar.time))
         }
@@ -68,7 +64,6 @@ class NewAppointmentActivity : AppCompatActivity() {
         val listener = TimePickerDialog.OnTimeSetListener { _, hour, minute ->
             calendar.set(Calendar.HOUR_OF_DAY, hour)
             calendar.set(Calendar.MINUTE, minute)
-
             val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
             editTextTime.setText(formatter.format(calendar.time))
         }
@@ -92,12 +87,21 @@ class NewAppointmentActivity : AppCompatActivity() {
             return
         }
 
-        val datetime = "$date $time"
+        val dateTimeMillis = try {
+            val parser = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            parser.parse("$date $time")!!.time
+        } catch (e: Exception) {
+            Toast.makeText(this, "Μη έγκυρη ημερομηνία/ώρα", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val appointment = Appointment(
             patientId = patientId,
-            datetime = datetime,
-            type = if (type.isBlank()) null else type,
-            notes = if (notes.isBlank()) null else notes
+            dateTime = dateTimeMillis,
+            status = if (type.isBlank()) "SCHEDULED" else type,
+            notes = if (notes.isBlank()) null else notes,
+            charge = null,
+            treatment = null
         )
 
         CoroutineScope(Dispatchers.IO).launch {

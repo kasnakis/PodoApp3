@@ -1,7 +1,6 @@
 package com.kasal.podoapp.ui
 
 import android.app.DatePickerDialog
-import android.net.Uri
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +23,7 @@ class NewVisitActivity : AppCompatActivity() {
     private lateinit var buttonSave: Button
 
     private val calendar = Calendar.getInstance()
-    private var patientId: Int = 0  // Από την PatientDetailActivity
+    private var patientId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,10 +39,7 @@ class NewVisitActivity : AppCompatActivity() {
         patientId = intent.getIntExtra("patientId", 0)
 
         editTextDate.setOnClickListener { showDatePicker() }
-
-        buttonSave.setOnClickListener {
-            saveVisit()
-        }
+        buttonSave.setOnClickListener { saveVisit() }
     }
 
     private fun showDatePicker() {
@@ -51,7 +47,6 @@ class NewVisitActivity : AppCompatActivity() {
             calendar.set(Calendar.YEAR, y)
             calendar.set(Calendar.MONTH, m)
             calendar.set(Calendar.DAY_OF_MONTH, d)
-
             val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             editTextDate.setText(formatter.format(calendar.time))
         }
@@ -71,20 +66,28 @@ class NewVisitActivity : AppCompatActivity() {
         val treatment = editTextTreatment.text.toString().trim()
         val notes = editTextNotes.text.toString().trim()
 
-        if (date.isBlank() || reason.isBlank() || diagnosis.isBlank() || treatment.isBlank()) {
-            Toast.makeText(this, "Συμπληρώστε όλα τα υποχρεωτικά πεδία", Toast.LENGTH_SHORT).show()
+        if (date.isBlank()) {
+            Toast.makeText(this, "Συμπληρώστε ημερομηνία", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val dateTimeMillis = try {
+            val parser = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+            // Επίσκεψη χωρίς ώρα → 00:00
+            parser.parse("$date 00:00")!!.time
+        } catch (_: Exception) {
+            Toast.makeText(this, "Μη έγκυρη ημερομηνία", Toast.LENGTH_SHORT).show()
             return
         }
 
         val visit = Visit(
             patientId = patientId,
-            date = date,
-            reason = reason,
-            diagnosis = diagnosis,
-            treatment = treatment,
-            notes = if (notes.isBlank()) null else notes,
-            photoUris = emptyList()
-            // Μπορούμε να προσθέσουμε Gallery support αργότερα
+            appointmentId = null,
+            dateTime = dateTimeMillis,
+            // reason -> notes, diagnosis -> προαιρετικά treatment (για να μη χαθεί το input)
+            notes = if (reason.isBlank()) null else reason,
+            treatment = if (diagnosis.isBlank()) (if (treatment.isBlank()) null else treatment) else diagnosis,
+            charge = null
         )
 
         CoroutineScope(Dispatchers.IO).launch {

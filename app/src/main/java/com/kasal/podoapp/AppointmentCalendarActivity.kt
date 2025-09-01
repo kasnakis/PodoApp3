@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.kasal.podoapp.R
-import com.kasal.podoapp.data.Appointment
 import com.kasal.podoapp.data.PodologiaDatabase
+import com.kasal.podoapp.data.Appointment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -21,7 +21,7 @@ import java.util.*
 
 class AppointmentCalendarActivity : AppCompatActivity() {
 
-    private lateinit var adapter: AppointmentAdapter
+    private lateinit var adapter: AppointmentForDayAdapter
     private lateinit var textSelectedDate: TextView
     private var selectedDate: String = getTodayDate()
 
@@ -33,24 +33,7 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         val buttonPickDate = findViewById<Button>(R.id.buttonPickDate)
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewDayAppointments)
 
-        adapter = AppointmentAdapter { appointment, action ->
-            when (action) {
-                AppointmentAdapter.ActionType.EDIT -> {
-                    val intent = Intent(this, EditAppointmentActivity::class.java)
-                    intent.putExtra("appointment", appointment)
-                    startActivity(intent)
-                }
-
-                AppointmentAdapter.ActionType.DELETE -> {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity)
-                            .appointmentDao().delete(appointment)
-                        loadAppointmentsWithNames(selectedDate)
-                    }
-                }
-            }
-        }
-
+        adapter = AppointmentForDayAdapter()
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -74,13 +57,24 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         }
     }
 
+    private fun dayBoundsMillis(date: String): Pair<Long, Long> {
+        val parts = date.split("-")
+        val y = parts.getOrNull(0)?.toIntOrNull() ?: 1970
+        val m0 = (parts.getOrNull(1)?.toIntOrNull() ?: 1) - 1
+        val d = parts.getOrNull(2)?.toIntOrNull() ?: 1
+        val start = Calendar.getInstance().apply { set(y, m0, d, 0, 0, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+        val end = Calendar.getInstance().apply { set(y, m0, d, 23, 59, 59); set(Calendar.MILLISECOND, 999) }.timeInMillis
+        return start to end
+    }
+
     private fun loadAppointmentsWithNames(date: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val db = PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity)
-            val appointments = db.appointmentDao().getAppointmentsForDate(date).first()
-            val listWithNames = appointments.map { appointment ->
+            val (start, end) = dayBoundsMillis(date)
+            val appointments = db.appointmentDao().getAppointmentsForDate(start, end).first()
+            val listWithNames: List<Pair<Appointment, String>> = appointments.map { appointment ->
                 val patient = db.patientDao().getPatientById(appointment.patientId)
-                Pair(appointment, patient?.fullName ?: "(χωρίς όνομα)")
+                appointment to (patient?.fullName ?: "(χωρίς όνομα)")
             }
 
             withContext(Dispatchers.Main) {
@@ -100,7 +94,7 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         return try {
             val parsed = inputFormat.parse(date)
             outputFormat.format(parsed!!)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             date
         }
     }
