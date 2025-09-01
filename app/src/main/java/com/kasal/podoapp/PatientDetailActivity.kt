@@ -5,6 +5,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.kasal.podoapp.R
+import com.kasal.podoapp.data.Patient
 import com.kasal.podoapp.data.PatientHistory
 import com.kasal.podoapp.data.PodologiaDatabase
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,7 @@ import kotlinx.coroutines.withContext
 class PatientDetailActivity : AppCompatActivity() {
 
     private var patientId: Int = 0
+    private var existing: PatientHistory? = null
 
     // Views
     private lateinit var etDoctorName: EditText
@@ -36,7 +38,7 @@ class PatientDetailActivity : AppCompatActivity() {
     private lateinit var cbPronation: CheckBox
     private lateinit var cbSupination: CheckBox
 
-    // Vascular (Right)
+    // Vascular (Right) – τα υπόλοιπα tabs τα χειριζόμαστε στα αντίστοιχα fragments
     private lateinit var cbEdemaRight: CheckBox
     private lateinit var cbVaricoseDorsalRight: CheckBox
     private lateinit var cbVaricosePlantarRight: CheckBox
@@ -53,7 +55,12 @@ class PatientDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_patient_detail)
 
+        // Προτιμάμε να λαμβάνουμε patientId. Υποστηρίζουμε και fallback με "patient" (Serializable).
         patientId = intent.getIntExtra("patientId", 0)
+        if (patientId == 0) {
+            val p = intent.getSerializableExtra("patient") as? Patient
+            if (p != null) patientId = p.id
+        }
         if (patientId == 0) {
             Toast.makeText(this, "Δεν βρέθηκε πελάτης", Toast.LENGTH_SHORT).show()
             finish()
@@ -65,11 +72,12 @@ class PatientDetailActivity : AppCompatActivity() {
 
         val db = PodologiaDatabase.getDatabase(this)
 
+        // Φόρτωση υπάρχοντος ιστορικού (αν υπάρχει)
         lifecycleScope.launch {
-            val existing = withContext(Dispatchers.IO) {
+            existing = withContext(Dispatchers.IO) {
                 db.patientHistoryDao().getByPatientId(patientId)
             }
-            if (existing != null) populate(existing)
+            existing?.let { populate(it) }
 
             btnSave.setOnClickListener {
                 val history = collectForm(existing?.id)
@@ -88,7 +96,7 @@ class PatientDetailActivity : AppCompatActivity() {
         }
     }
 
-    // --- Helper που βρίσκει checkbox με πολλά πιθανά ids (τρέχον & παλιά) ---
+    // Helper: εντοπίζει CheckBox δοκιμάζοντας πιθανά ids (τρέχον + παλιά/typos)
     private fun findCheckBox(vararg names: String): CheckBox {
         for (name in names) {
             val id = resources.getIdentifier(name, "id", packageName)
@@ -121,7 +129,7 @@ class PatientDetailActivity : AppCompatActivity() {
         cbPronation = findViewById(R.id.cbPronation)
         cbSupination = findViewById(R.id.cbSupination)
 
-        // Δοκίμασε πρώτα τα σωστά/camelCase ids — μετά εναλλακτικά παλιά/typo ids
+        // Δοκιμάζουμε πρώτα τα σωστά ids, μετά παλιότερα/typos για συμβατότητα
         cbEdemaRight = findCheckBox("cbEdemaRight", "cbedemaRight", "cbEdema_right")
         cbVaricoseDorsalRight = findCheckBox("cbVaricoseDorsalRight", "cbvaricoseDorsalRight")
         cbVaricosePlantarRight = findCheckBox("cbVaricosePlantarRight", "cbvaricosePlantarRight")
@@ -194,9 +202,12 @@ class PatientDetailActivity : AppCompatActivity() {
             pronation = cbPronation.isChecked,
             supination = cbSupination.isChecked,
 
-            // Vascular (Right) μόνο για τώρα
+            // προς το παρόν μόνο τα right-vascular από αυτό το Activity
+            edemaLeft = existing?.edemaLeft ?: false, // δεν υπάρχει control εδώ
             edemaRight = cbEdemaRight.isChecked,
+            varicoseDorsalLeft = existing?.varicoseDorsalLeft ?: false,
             varicoseDorsalRight = cbVaricoseDorsalRight.isChecked,
+            varicosePlantarLeft = existing?.varicosePlantarLeft ?: false,
             varicosePlantarRight = cbVaricosePlantarRight.isChecked,
 
             splintNotes = etSplintNotes.text.toString().trim().ifEmpty { null },

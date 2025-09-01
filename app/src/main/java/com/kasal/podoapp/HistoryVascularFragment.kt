@@ -12,11 +12,11 @@ import com.kasal.podoapp.data.PatientHistory
 class HistoryVascularFragment : Fragment(), HistorySection {
 
     private lateinit var cbEdemaLeft: CheckBox
-    private lateinit var cbedemaRight: CheckBox
-    private lateinit var cbVarDorsalLeft: CheckBox
-    private lateinit var cbVarDorsalRight: CheckBox
-    private lateinit var cbVarPlantarLeft: CheckBox
-    private lateinit var cbVarPlantarRight: CheckBox
+    private lateinit var cbEdemaRight: CheckBox
+    private lateinit var cbVaricoseDorsalLeft: CheckBox
+    private lateinit var cbVaricoseDorsalRight: CheckBox
+    private lateinit var cbVaricosePlantarLeft: CheckBox
+    private lateinit var cbVaricosePlantarRight: CheckBox
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_history_vascular, container, false)
@@ -24,29 +24,29 @@ class HistoryVascularFragment : Fragment(), HistorySection {
 
     override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
         cbEdemaLeft = v.findViewById(R.id.cbEdemaLeft)
-        cbedemaRight = v.findViewById(R.id.cbedemaRight)
-        cbVarDorsalLeft = v.findViewById(R.id.cbVaricoseDorsalLeft)
-        cbVarDorsalRight = v.findViewById(R.id.cbvaricoseDorsalRight)
-        cbVarPlantarLeft = v.findViewById(R.id.cbVaricosePlantarLeft)
-        cbVarPlantarRight = v.findViewById(R.id.cbvaricosePlantarRight)
+        cbEdemaRight = v.findViewById(R.id.cbEdemaRight)
+        cbVaricoseDorsalLeft = v.findViewById(R.id.cbVaricoseDorsalLeft)
+        cbVaricoseDorsalRight = v.findViewById(R.id.cbVaricoseDorsalRight)
+        cbVaricosePlantarLeft = v.findViewById(R.id.cbVaricosePlantarLeft)
+        cbVaricosePlantarRight = v.findViewById(R.id.cbVaricosePlantarRight)
     }
 
     override fun prefill(history: PatientHistory?) {
         history ?: return
         cbEdemaLeft.isChecked = history.edemaLeft
-        cbedemaRight.isChecked = history.edemaRight
-        cbVarDorsalLeft.isChecked = history.varicoseDorsalLeft
-        cbVarDorsalRight.isChecked = history.varicoseDorsalRight
-        cbVarPlantarLeft.isChecked = history.varicosePlantarLeft
-        cbVarPlantarRight.isChecked = history.varicosePlantarRight
+        cbEdemaRight.isChecked = history.edemaRight
+        cbVaricoseDorsalLeft.isChecked = history.varicoseDorsalLeft
+        cbVaricoseDorsalRight.isChecked = history.varicoseDorsalRight
+        cbVaricosePlantarLeft.isChecked = history.varicosePlantarLeft
+        cbVaricosePlantarRight.isChecked = history.varicosePlantarRight
     }
 
     override fun collectInto(aggr: PatientHistoryAggregator) {
         aggr.edemaLeft = cbEdemaLeft.isChecked
-        aggr.edemaRight = cbedemaRight.isChecked
-        aggr.varicoseDorsalLeft = cbVarDorsalLeft.isChecked
-        aggr.varicoseDorsalRight = cbVarDorsalRight.isChecked
-        aggr.varicosePlantarLeft = cbVarPlantarLeft.isChecked
-        aggr.varicosePlantarRight = cbVarPlantarRight.isChecked
+        aggr.edemaRight = cbEdemaRight.isChecked
+        aggr.varicoseDorsalLeft = cbVaricoseDorsalLeft.isChecked
+        aggr.varicoseDorsalRight = cbVaricoseDorsalRight.isChecked
+        aggr.varicosePlantarLeft = cbVaricosePlantarLeft.isChecked
+        aggr.varicosePlantarRight = cbVaricosePlantarRight.isChecked
     }
 }

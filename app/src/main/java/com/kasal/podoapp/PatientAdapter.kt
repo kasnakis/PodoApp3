@@ -2,7 +2,7 @@ package com.kasal.podoapp.ui
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent // Προσθήκη import για Intent
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,22 +34,17 @@ class PatientAdapter(
         val patient = patients[position]
         holder.bind(patient)
 
-        // Η νέα λογική για το κλικ στο item
+        // Άνοιγμα λεπτομερειών πελάτη με βάση ΜΟΝΟ το id
         holder.itemView.setOnClickListener {
             val intent = Intent(context, PatientDetailActivity::class.java)
-            // Σημείωση: Για να περάσεις ένα ολόκληρο αντικείμενο Patient,
-            // η κλάση Patient πρέπει να υλοποιεί την Parcelable ή Serializable.
-            // Η Parcelable είναι πιο αποδοτική.
-            intent.putExtra("patient", patient)
+            intent.putExtra("patientId", patient.id)   // <-- περνάμε μόνο το id
             context.startActivity(intent)
         }
     }
 
     override fun getItemCount(): Int = patients.size
 
-    // Η μέθοδος showEditDialog() δεν καλείται πλέον στο setOnClickListener του item,
-    // αλλά μπορεί να την κρατήσεις αν την καλείς από αλλού (π.χ. ένα κουμπί επεξεργασίας εντός του item).
-    // Αν όχι, μπορείς να την αφαιρέσεις αν δεν χρησιμοποιείται πια.
+    // Προαιρετικό: διάλογος επεξεργασίας/διαγραφής (μένει ως έχει)
     private fun showEditDialog(position: Int) {
         val patient = patients[position]
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_patient, null)
@@ -82,8 +77,8 @@ class PatientAdapter(
                     val updatedPatient = patient.copy(
                         fullName = updatedName,
                         phone = updatedPhone,
-                        address = updatedAddress,
-                        notes = updatedNotes,
+                        address = updatedAddress.ifEmpty { null },
+                        notes = updatedNotes.ifEmpty { null },
                         category = updatedCategory
                     )
                     patients[position] = updatedPatient
