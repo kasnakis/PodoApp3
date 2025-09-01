@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:padding="16dp"
     android:layout_width="match_parent" android:layout_height="match_parent">
-    <LinearLayout android:orientation="vertical" android:padding="8dp"
-        android:layout_width="match_parent" android:layout_height="wrap_content">
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent" android:layout_height="wrap_content">
-            <LinearLayout android:orientation="vertical" android:padding="12dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content">
-                <CheckBox android:id="@+id/cbEdemaLeft" android:text="Οίδημα Αριστερά"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <CheckBox android:id="@+id/cbedemaRight" android:text="Οίδημα Δεξιά"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <CheckBox android:id="@+id/cbVaricoseDorsalLeft" android:text="Κιρσοί Ραχιαία Αριστερά"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <CheckBox android:id="@+id/cbvaricoseDorsalRight" android:text="Κιρσοί Ραχιαία Δεξιά"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <CheckBox android:id="@+id/cbVaricosePlantarLeft" android:text="Κιρσοί Πελματιαία Αριστερά"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <CheckBox android:id="@+id/cbvaricosePlantarRight" android:text="Κιρσοί Πελματιαία Δεξιά"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-    </LinearLayout>
-</ScrollView>
+
+    <CheckBox android:id="@+id/cbEdemaLeft"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Οίδημα (αριστερό)"/>
+
+    <CheckBox android:id="@+id/cbEdemaRight"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Οίδημα (δεξί)"/>
+
+    <CheckBox android:id="@+id/cbVaricoseDorsalLeft"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Κιρσοί ραχιαία (αριστερό)"/>
+
+    <CheckBox android:id="@+id/cbVaricoseDorsalRight"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Κιρσοί ραχιαία (δεξί)"/>
+
+    <CheckBox android:id="@+id/cbVaricosePlantarLeft"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Κιρσοί πελματιαία (αριστερό)"/>
+
+    <CheckBox android:id="@+id/cbVaricosePlantarRight"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Κιρσοί πελματιαία (δεξί)"/>
+</LinearLayout>

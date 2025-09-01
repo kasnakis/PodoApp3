@@ -1,64 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
-
-    <LinearLayout android:orientation="vertical"
-        android:padding="8dp"
+    <LinearLayout
+        android:orientation="vertical" android:padding="16dp"
         android:layout_width="match_parent" android:layout_height="wrap_content">
 
-        <com.google.android.material.card.MaterialCardView
+        <EditText android:id="@+id/etDoctorName"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
-            <LinearLayout android:orientation="vertical" android:padding="12dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView android:text="Θεράπων ιατρός" android:textStyle="bold"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etDoctorName" android:hint="Όνομα"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etDoctorPhone" android:hint="Τηλέφωνο"
-                    android:inputType="phone"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:hint="Ιατρός (όνομα)"/>
 
-        <com.google.android.material.card.MaterialCardView
+        <EditText android:id="@+id/etDoctorPhone"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp">
-            <LinearLayout android:orientation="vertical" android:padding="12dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView android:text="Αναμνηστικό / Αλλεργίες" android:textStyle="bold"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etDiagnosis" android:hint="Διάγνωση ιατρού"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etMedication" android:hint="Φαρμακευτική αγωγή"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etAllergies" android:hint="Αλλεργίες"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:hint="Ιατρός (τηλέφωνο)" android:inputType="phone"/>
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent" android:layout_height="wrap_content">
-            <LinearLayout android:orientation="vertical" android:padding="12dp"
-                android:layout_width="match_parent" android:layout_height="wrap_content">
-                <TextView android:text="Διαβήτης" android:textStyle="bold"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <Switch android:id="@+id/switchDiabetic" android:text="Διαβητικός;"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                <Spinner android:id="@+id/spinnerDiabeticType"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etInsulinNotes" android:hint="Σημειώσεις ινσουλίνης"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etPillsNotes" android:hint="Σημειώσεις χαπιών"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etOtherConditions" android:hint="Άλλες παθήσεις/συνθήκες"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etAnticoagulants" android:hint="Αντιπηκτική αγωγή"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-                <EditText android:id="@+id/etContagious" android:hint="Μεταδοτικά νοσήματα"
-                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        <EditText android:id="@+id/etDoctorDiagnosis"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Διάγνωση ιατρού" android:inputType="textMultiLine"/>
 
+        <EditText android:id="@+id/etMedication"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Φαρμακευτική αγωγή" android:inputType="textMultiLine"/>
+
+        <EditText android:id="@+id/etAllergies"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Αλλεργίες" android:inputType="textMultiLine"/>
+
+        <Switch
+            android:id="@+id/switchDiabetic"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Διαβήτης"/>
+
+        <Spinner
+            android:id="@+id/spinnerDiabeticType"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+        <EditText android:id="@+id/etInsulinNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Insulin notes" android:inputType="textMultiLine"/>
+
+        <EditText android:id="@+id/etPillsNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Pills notes" android:inputType="textMultiLine"/>
+
+        <EditText android:id="@+id/etOtherConditions"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Λοιπές παθήσεις" android:inputType="textMultiLine"/>
+
+        <EditText android:id="@+id/etAnticoagulantsNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Αντιπηκτικά - σημειώσεις" android:inputType="textMultiLine"/>
+
+        <EditText android:id="@+id/etContagiousDiseasesNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Μεταδοτικά νοσήματα - σημειώσεις" android:inputType="textMultiLine"/>
     </LinearLayout>
 </ScrollView>

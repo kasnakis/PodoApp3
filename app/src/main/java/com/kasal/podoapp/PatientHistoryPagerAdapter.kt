@@ -5,11 +5,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.kasal.podoapp.data.PatientHistory
 
-interface HistorySection {
-    fun collectInto(aggr: PatientHistoryAggregator)
-    fun prefill(history: PatientHistory?)
-}
-
 class PatientHistoryPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
 
     private val fragments = LinkedHashMap<Int, Fragment>()
@@ -30,10 +25,10 @@ class PatientHistoryPagerAdapter(activity: FragmentActivity) : FragmentStateAdap
     }
 
     fun prefillAll(history: PatientHistory?) {
-        fragments.values.forEach { f -> (f as? HistorySection)?.prefill(history) }
+        fragments.values.forEach { (it as? HistorySection)?.prefill(history) }
     }
 
     fun collectAllInto(aggr: PatientHistoryAggregator) {
-        fragments.values.forEach { f -> (f as? HistorySection)?.collectInto(aggr) }
+        fragments.values.forEach { (it as? HistorySection)?.collectInto(aggr) }
     }
 }
