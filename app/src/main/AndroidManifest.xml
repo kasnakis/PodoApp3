@@ -34,6 +34,8 @@
         <activity android:name=".ui.PatientDetailActivity"/>
         <activity android:name=".ui.AppointmentActivity"/>
         <activity android:name=".ui.VisitListActivity"/>
+        <activity android:name=".ui.PatientHistoryTabsActivity" />
+
 
 
 

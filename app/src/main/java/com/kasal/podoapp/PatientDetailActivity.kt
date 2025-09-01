@@ -3,15 +3,16 @@ package com.kasal.podoapp.ui
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.PatientHistory
 import com.kasal.podoapp.data.PodologiaDatabase
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PatientDetailActivity : AppCompatActivity() {
 
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var patientId: Int = 0
 
     // Views
@@ -35,11 +36,9 @@ class PatientDetailActivity : AppCompatActivity() {
     private lateinit var cbPronation: CheckBox
     private lateinit var cbSupination: CheckBox
 
-    private lateinit var cbEdemaLeft: CheckBox
+    // Vascular (Right)
     private lateinit var cbEdemaRight: CheckBox
-    private lateinit var cbVaricoseDorsalLeft: CheckBox
     private lateinit var cbVaricoseDorsalRight: CheckBox
-    private lateinit var cbVaricosePlantarLeft: CheckBox
     private lateinit var cbVaricosePlantarRight: CheckBox
 
     private lateinit var etSplintNotes: EditText
@@ -57,31 +56,48 @@ class PatientDetailActivity : AppCompatActivity() {
         patientId = intent.getIntExtra("patientId", 0)
         if (patientId == 0) {
             Toast.makeText(this, "Δεν βρέθηκε πελάτης", Toast.LENGTH_SHORT).show()
-            finish(); return
+            finish()
+            return
         }
 
         bindViews()
         setupSpinners()
 
         val db = PodologiaDatabase.getDatabase(this)
-        scope.launch {
+
+        lifecycleScope.launch {
             val existing = withContext(Dispatchers.IO) {
-                db.patientHistoryDao().observeByPatientId(patientId).first()
+                db.patientHistoryDao().getByPatientId(patientId)
             }
             if (existing != null) populate(existing)
 
             btnSave.setOnClickListener {
                 val history = collectForm(existing?.id)
-                scope.launch(Dispatchers.IO) {
+                lifecycleScope.launch(Dispatchers.IO) {
                     db.patientHistoryDao().upsert(history)
-                }.invokeOnCompletion {
-                    runOnUiThread {
-                        Toast.makeText(this@PatientDetailActivity, "Αποθηκεύτηκε το Αναμνηστικό", Toast.LENGTH_SHORT).show()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@PatientDetailActivity,
+                            "Αποθηκεύτηκε το Αναμνηστικό",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         finish()
                     }
                 }
             }
         }
+    }
+
+    // --- Helper που βρίσκει checkbox με πολλά πιθανά ids (τρέχον & παλιά) ---
+    private fun findCheckBox(vararg names: String): CheckBox {
+        for (name in names) {
+            val id = resources.getIdentifier(name, "id", packageName)
+            if (id != 0) {
+                val v: CheckBox? = findViewById(id)
+                if (v != null) return v
+            }
+        }
+        error("Δεν βρέθηκε κανένα από τα ids: ${names.joinToString()}")
     }
 
     private fun bindViews() {
@@ -105,12 +121,10 @@ class PatientDetailActivity : AppCompatActivity() {
         cbPronation = findViewById(R.id.cbPronation)
         cbSupination = findViewById(R.id.cbSupination)
 
-        cbEdemaLeft = findViewById(R.id.cbEdemaLeft)
-        cbEdemaRight = findViewById(R.id.cbEdemaRight)
-        cbVaricoseDorsalLeft = findViewById(R.id.cbVaricoseDorsalLeft)
-        cbVaricoseDorsalRight = findViewById(R.id.cbVaricoseDorsalRight)
-        cbVaricosePlantarLeft = findViewById(R.id.cbVaricosePlantarLeft)
-        cbVaricosePlantarRight = findViewById(R.id.cbVaricosePlantarRight)
+        // Δοκίμασε πρώτα τα σωστά/camelCase ids — μετά εναλλακτικά παλιά/typo ids
+        cbEdemaRight = findCheckBox("cbEdemaRight", "cbedemaRight", "cbEdema_right")
+        cbVaricoseDorsalRight = findCheckBox("cbVaricoseDorsalRight", "cbvaricoseDorsalRight")
+        cbVaricosePlantarRight = findCheckBox("cbVaricosePlantarRight", "cbvaricosePlantarRight")
 
         etSplintNotes = findViewById(R.id.etSplintNotes)
         spinnerOrthoticType = findViewById(R.id.spinnerOrthoticType)
@@ -146,11 +160,9 @@ class PatientDetailActivity : AppCompatActivity() {
         cbPronation.isChecked = h.pronation
         cbSupination.isChecked = h.supination
 
-        cbEdemaLeft.isChecked = h.edemaLeft
+        // Vascular (Right)
         cbEdemaRight.isChecked = h.edemaRight
-        cbVaricoseDorsalLeft.isChecked = h.varicoseDorsalLeft
         cbVaricoseDorsalRight.isChecked = h.varicoseDorsalRight
-        cbVaricosePlantarLeft.isChecked = h.varicosePlantarLeft
         cbVaricosePlantarRight.isChecked = h.varicosePlantarRight
 
         etSplintNotes.setText(h.splintNotes ?: "")
@@ -161,15 +173,18 @@ class PatientDetailActivity : AppCompatActivity() {
         return PatientHistory(
             id = existingId ?: 0,
             patientId = patientId,
+
             doctorName = etDoctorName.text.toString().trim().ifEmpty { null },
             doctorPhone = etDoctorPhone.text.toString().trim().ifEmpty { null },
             doctorDiagnosis = etDiagnosis.text.toString().trim().ifEmpty { null },
             medication = etMedication.text.toString().trim().ifEmpty { null },
             allergies = etAllergies.text.toString().trim().ifEmpty { null },
+
             isDiabetic = switchDiabetic.isChecked,
             diabeticType = diabeticTypes[spinnerDiabeticType.selectedItemPosition].ifEmpty { null },
             insulinNotes = etInsulinNotes.text.toString().trim().ifEmpty { null },
             pillsNotes = etPillsNotes.text.toString().trim().ifEmpty { null },
+
             metatarsalDrop = cbMetatarsalDrop.isChecked,
             valgus = cbValgus.isChecked,
             varus = cbVarus.isChecked,
@@ -178,19 +193,14 @@ class PatientDetailActivity : AppCompatActivity() {
             flatfoot = cbFlatfoot.isChecked,
             pronation = cbPronation.isChecked,
             supination = cbSupination.isChecked,
-            edemaLeft = cbEdemaLeft.isChecked,
+
+            // Vascular (Right) μόνο για τώρα
             edemaRight = cbEdemaRight.isChecked,
-            varicoseDorsalLeft = cbVaricoseDorsalLeft.isChecked,
             varicoseDorsalRight = cbVaricoseDorsalRight.isChecked,
-            varicosePlantarLeft = cbVaricosePlantarLeft.isChecked,
             varicosePlantarRight = cbVaricosePlantarRight.isChecked,
+
             splintNotes = etSplintNotes.text.toString().trim().ifEmpty { null },
             orthoticType = orthoticTypes[spinnerOrthoticType.selectedItemPosition]
         )
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
     }
 }

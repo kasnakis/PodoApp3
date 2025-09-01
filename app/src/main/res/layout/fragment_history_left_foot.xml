@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:padding="8dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp">
+            <LinearLayout android:orientation="vertical" android:padding="12dp"
+                android:layout_width="match_parent" android:layout_height="wrap_content">
+                <CheckBox android:id="@+id/cbLeftHyperkeratosis" android:text="Υπερκεράτωση"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <CheckBox android:id="@+id/cbLeftHalluxValgus" android:text="Βλαισός Μέγας Δάκτυλος"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <CheckBox android:id="@+id/cbLeftWarts" android:text="Μυρμηγκιές"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <CheckBox android:id="@+id/cbLeftDermatophytosis" android:text="Δερματοφυτίαση"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:padding="12dp"
+                android:layout_width="match_parent" android:layout_height="wrap_content">
+                <EditText android:id="@+id/etLeftDorsalCalluses" android:hint="Ραχιαίοι κάλοι - σημειώσεις"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <EditText android:id="@+id/etLeftInterdigitalCalluses" android:hint="Μεσοδακτύλιοι κάλοι - σημειώσεις"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <EditText android:id="@+id/etLeftPlantarCalluses" android:hint="Πελματιαίοι κάλοι - σημειώσεις"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <EditText android:id="@+id/etLeftHammerToe" android:hint="Σφυροδακτυλία - σημειώσεις"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <EditText android:id="@+id/etLeftOnychomycosis" android:hint="Ονυχομυκητίαση - σημειώσεις"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <EditText android:id="@+id/etLeftOnychocryptosis" android:hint="Ονυχοκρύπτωση - σημειώσεις"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                <EditText android:id="@+id/etLeftNailStatus" android:hint="Κατάσταση ονύχων - σημειώσεις"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Checkboxes -->
+        <CheckBox
+            android:id="@+id/cbRightHyperkeratosis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Υπερκεράτωση (δεξί)" />
+
+        <CheckBox
+            android:id="@+id/cbRightHalluxValgus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Κότσι / Hallux Valgus (δεξί)" />
+
+        <CheckBox
+            android:id="@+id/cbRightWarts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Κονδυλώματα (δεξί)" />
+
+        <CheckBox
+            android:id="@+id/cbRightDermatophytosis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Δερματοφυτία (δεξί)" />
+
+        <!-- Notes -->
+        <EditText
+            android:id="@+id/etRightDorsalCalluses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Κάλοι ράχης (δεξί)"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+
+        <EditText
+            android:id="@+id/etRightInterdigitalCalluses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Κάλοι μεσοδακτύλιοι (δεξί)"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+
+        <EditText
+            android:id="@+id/etRightPlantarCalluses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Κάλοι πελματιαίοι (δεξί)"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+
+        <EditText
+            android:id="@+id/etRightHammerToe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Σφυροδακτυλία (δεξί)"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+
+        <EditText
+            android:id="@+id/etRightOnychomycosis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ονυχομυκητίαση (δεξί)"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+
+        <EditText
+            android:id="@+id/etRightOnychocryptosis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ονυχοκρύπτωση (δεξί)"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+
+        <EditText
+            android:id="@+id/etRightNailStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Κατάσταση νυχιών (δεξί)"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+
+    </LinearLayout>
+</ScrollView>

@@ -42,11 +42,11 @@
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="Οίδημα και Κιρσοί" android:textStyle="bold" android:paddingTop="8dp"/>
         <CheckBox android:id="@+id/cbEdemaLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Οίδημα Αριστερά"/>
-        <CheckBox android:id="@+id/cbEdemaRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Οίδημα Δεξιά"/>
+        <CheckBox android:id="@+id/cbedemaRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Οίδημα Δεξιά"/>
         <CheckBox android:id="@+id/cbVaricoseDorsalLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Ραχιαία Αριστερά"/>
-        <CheckBox android:id="@+id/cbVaricoseDorsalRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Ραχιαία Δεξιά"/>
+        <CheckBox android:id="@+id/cbvaricoseDorsalRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Ραχιαία Δεξιά"/>
         <CheckBox android:id="@+id/cbVaricosePlantarLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Πελματιαία Αριστερά"/>
-        <CheckBox android:id="@+id/cbVaricosePlantarRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Πελματιαία Δεξιά"/>
+        <CheckBox android:id="@+id/cbvaricosePlantarRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Πελματιαία Δεξιά"/>
 
         <!-- Νάρθηκας & Πάτοι -->
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"

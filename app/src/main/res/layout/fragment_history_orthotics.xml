@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:padding="12dp"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:padding="12dp"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <EditText android:id="@+id/etSplintNotes" android:hint="Σημειώσεις νάρθηκα"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            <Spinner android:id="@+id/spinnerOrthoticType"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>
