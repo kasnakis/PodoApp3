@@ -1,10 +1,15 @@
 package com.kasal.podoapp.data
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppointmentDao {
+
     @Insert
     suspend fun insert(appointment: Appointment): Long
 
@@ -14,12 +19,26 @@ interface AppointmentDao {
     @Delete
     suspend fun delete(appointment: Appointment)
 
+    @Query("DELETE FROM appointments WHERE id = :id")
+    suspend fun deleteById(id: Int)
+
+    @Query("SELECT * FROM appointments WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Int): Appointment?
+
     @Query("UPDATE appointments SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: Int, status: String)
 
-    @Query("SELECT * FROM appointments WHERE patientId = :patientId ORDER BY dateTime DESC")
+    @Query("""
+        SELECT * FROM appointments
+        WHERE patientId = :patientId
+        ORDER BY dateTime DESC
+    """)
     fun forPatient(patientId: Int): Flow<List<Appointment>>
 
-    @Query("SELECT * FROM appointments WHERE dateTime BETWEEN :start AND :end ORDER BY dateTime ASC")
-    fun getAppointmentsForDate(start: Long, end: Long): Flow<List<Appointment>>
+    @Query("""
+        SELECT * FROM appointments
+        WHERE dateTime BETWEEN :start AND :end
+        ORDER BY dateTime ASC
+    """)
+    suspend fun getAppointmentsForDate(start: Long, end: Long): List<Appointment>
 }

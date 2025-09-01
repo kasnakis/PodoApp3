@@ -1,101 +1,82 @@
 package com.kasal.podoapp.ui
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.kasal.podoapp.R
-import com.kasal.podoapp.data.PodologiaDatabase
 import com.kasal.podoapp.data.Appointment
-import kotlinx.coroutines.CoroutineScope
+import com.kasal.podoapp.data.PodologiaDatabase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
 
 class AppointmentCalendarActivity : AppCompatActivity() {
 
+    private lateinit var recycler: RecyclerView
     private lateinit var adapter: AppointmentForDayAdapter
-    private lateinit var textSelectedDate: TextView
-    private var selectedDate: String = getTodayDate()
+
+    private var currentDayStart: Long = 0L
+    private var currentDayEnd: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_appointment_calendar)
 
-        textSelectedDate = findViewById(R.id.textSelectedDate)
-        val buttonPickDate = findViewById<Button>(R.id.buttonPickDate)
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewDayAppointments)
+        // Προσοχή: χρησιμοποίησε το ID που έχεις στο XML σου
+        recycler = findViewById(R.id.recyclerViewDayAppointments)
+        recycler.layoutManager = LinearLayoutManager(this)
 
+        // Ο δικός σου adapter ΔΕΝ παίρνει callbacks στον constructor
         adapter = AppointmentForDayAdapter()
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
+        recycler.adapter = adapter
 
-        textSelectedDate.text = formatDateForDisplay(selectedDate)
-        loadAppointmentsWithNames(selectedDate)
+        setTodayBounds()
+        reloadSelectedDay()
+    }
 
-        buttonPickDate.setOnClickListener {
-            val picker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Επιλογή Ημερομηνίας")
-                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                .build()
-
-            picker.show(supportFragmentManager, picker.toString())
-
-            picker.addOnPositiveButtonClickListener { selection ->
-                val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(selection))
-                selectedDate = date
-                textSelectedDate.text = formatDateForDisplay(date)
-                loadAppointmentsWithNames(date)
-            }
+    private fun setTodayBounds() {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
+        currentDayStart = cal.timeInMillis
+        cal.add(Calendar.DAY_OF_MONTH, 1)
+        currentDayEnd = cal.timeInMillis - 1
     }
 
-    private fun dayBoundsMillis(date: String): Pair<Long, Long> {
-        val parts = date.split("-")
-        val y = parts.getOrNull(0)?.toIntOrNull() ?: 1970
-        val m0 = (parts.getOrNull(1)?.toIntOrNull() ?: 1) - 1
-        val d = parts.getOrNull(2)?.toIntOrNull() ?: 1
-        val start = Calendar.getInstance().apply { set(y, m0, d, 0, 0, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
-        val end = Calendar.getInstance().apply { set(y, m0, d, 23, 59, 59); set(Calendar.MILLISECOND, 999) }.timeInMillis
-        return start to end
-    }
+    private fun reloadSelectedDay() {
+        val db = PodologiaDatabase.getDatabase(this)
+        val apptDao = db.appointmentDao()
+        val patientDao = db.patientDao()
 
-    private fun loadAppointmentsWithNames(date: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val db = PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity)
-            val (start, end) = dayBoundsMillis(date)
-            val appointments = db.appointmentDao().getAppointmentsForDate(start, end).first()
-            val listWithNames: List<Pair<Appointment, String>> = appointments.map { appointment ->
-                val patient = db.patientDao().getPatientById(appointment.patientId)
-                appointment to (patient?.fullName ?: "(χωρίς όνομα)")
+        lifecycleScope.launch {
+            val list: List<Appointment> = withContext(Dispatchers.IO) {
+                // Χρησιμοποιούμε το DAO που δώσαμε πριν
+                apptDao.getAppointmentsForDate(currentDayStart, currentDayEnd)
             }
 
-            withContext(Dispatchers.Main) {
-                adapter.submitList(listWithNames)
+            // Ο δικός σου AppointmentForDayAdapter κρατάει List<Pair<Appointment, String>>
+            // όπου το δεύτερο στοιχείο είναι συνήθως το όνομα πελάτη
+            val pairs: List<Pair<Appointment, String>> = withContext(Dispatchers.IO) {
+                list.map { a ->
+                    val p = patientDao.getById(a.patientId)
+                    val name = p?.fullName ?: "—"
+                    a to name
+                }
             }
-        }
-    }
 
-    private fun getTodayDate(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return sdf.format(Date())
-    }
-
-    private fun formatDateForDisplay(date: String): String {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("EEEE dd/MM/yyyy", Locale("el"))
-        return try {
-            val parsed = inputFormat.parse(date)
-            outputFormat.format(parsed!!)
-        } catch (_: Exception) {
-            date
+            // Ο adapter σου έχει submitList(...)
+            adapter.submitList(pairs)
+        }.invokeOnCompletion {
+            if (it != null) {
+                Toast.makeText(this, "Σφάλμα: ${it.message}", Toast.LENGTH_LONG).show()
+            }
         }
     }
 }
