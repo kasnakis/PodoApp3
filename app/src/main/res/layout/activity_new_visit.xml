@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editTextVisitDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ημερομηνία επίσκεψης"
+            android:focusable="false"
+            android:clickable="true" />
+
+        <EditText
+            android:id="@+id/editTextVisitReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Λόγος επίσκεψης"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editTextVisitDiagnosis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Διάγνωση"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editTextVisitTreatment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Θεραπεία"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editTextVisitNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Σημειώσεις (προαιρετικά)"
+            android:minLines="3"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/buttonSaveVisit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Αποθήκευση"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+</ScrollView>

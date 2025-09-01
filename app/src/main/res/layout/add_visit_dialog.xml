@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editTextReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Λόγος επίσκεψης" />
+
+        <EditText
+            android:id="@+id/editTextSkinCondition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Κατάσταση δέρματος" />
+
+        <EditText
+            android:id="@+id/editTextPulse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Σφυγμοί"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/editTextTemperature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Θερμοκρασία"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/editTextFootType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Τύπος ποδιού" />
+
+        <EditText
+            android:id="@+id/editTextConditions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Παθήσεις" />
+
+        <EditText
+            android:id="@+id/editTextTreatments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Θεραπείες" />
+
+        <EditText
+            android:id="@+id/editTextNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Γενικές σημειώσεις" />
+
+        <Button
+            android:id="@+id/buttonSelectDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Επιλογή Ημερομηνίας" />
+
+        <Button
+            android:id="@+id/buttonAddPhotos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Προσθήκη Φωτογραφιών" />
+
+    </LinearLayout>
+</ScrollView>

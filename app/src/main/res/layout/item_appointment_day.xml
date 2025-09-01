@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp"
+    android:elevation="2dp">
+
+    <TextView
+        android:id="@+id/textPatientName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Όνομα Πελάτη"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#000000" />
+
+    <TextView
+        android:id="@+id/textType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Τύπος"
+        android:textSize="14sp"
+        android:textColor="#444444"
+        android:paddingTop="2dp" />
+
+    <TextView
+        android:id="@+id/textAppointmentTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ώρα"
+        android:textColor="#555555"
+        android:paddingTop="4dp" />
+
+    <TextView
+        android:id="@+id/textAppointmentNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Σημειώσεις"
+        android:textColor="#777777"
+        android:paddingTop="4dp" />
+
+</LinearLayout>

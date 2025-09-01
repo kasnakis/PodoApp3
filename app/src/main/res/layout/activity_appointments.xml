@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:padding="12dp"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Νέο Ραντεβού" android:textStyle="bold" android:textSize="18sp"/>
+
+    <TextView android:id="@+id/tvDateTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ημ/νία - Ώρα"/>
+    <Button android:id="@+id/btnPickDateTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Επιλογή"/>
+
+    <EditText android:id="@+id/etApptNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Σημειώσεις"/>
+    <EditText android:id="@+id/etApptCharge" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Χρέωση"/>
+    <EditText android:id="@+id/etApptTreatment" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Θεραπεία"/>
+
+    <Button android:id="@+id/btnSaveAppt" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Αποθήκευση" android:layout_marginTop="8dp"/>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#DDD" android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="Ραντεβού Πελάτη" android:textStyle="bold" android:textSize="18sp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerAppointments"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+</LinearLayout>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editTextDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ημερομηνία"
+            android:focusable="false"
+            android:clickable="true" />
+
+        <EditText
+            android:id="@+id/editTextTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ώρα"
+            android:focusable="false"
+            android:clickable="true"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editTextType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Τύπος ραντεβού"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editTextStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Κατάσταση (π.χ. Προγραμματισμένο)"
+            android:layout_marginTop="12dp" />
+
+        <EditText
+            android:id="@+id/editTextNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Σημειώσεις"
+            android:minLines="3"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/buttonUpdateAppointment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Αποθήκευση"
+            android:layout_marginTop="20dp" />
+    </LinearLayout>
+</ScrollView>

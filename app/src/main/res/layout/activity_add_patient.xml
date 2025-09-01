@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editTextFullName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ονοματεπώνυμο" />
+
+        <EditText
+            android:id="@+id/editTextPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Τηλέφωνο"
+            android:inputType="phone" />
+
+        <EditText
+            android:id="@+id/editTextCardCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Αριθμός κάρτας / Κωδικός πελάτη" />
+
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-mail"
+            android:inputType="textEmailAddress" />
+
+        <EditText
+            android:id="@+id/editTextBirthDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ημ/νία γέννησης (π.χ. 1985-07-14)"
+            android:inputType="date" />
+
+        <EditText
+            android:id="@+id/editTextProfession"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Επάγγελμα" />
+
+        <EditText
+            android:id="@+id/editTextNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Σημειώσεις"
+            android:inputType="textMultiLine"
+            android:minLines="3" />
+
+        <Button
+            android:id="@+id/buttonSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Αποθήκευση"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+</ScrollView>

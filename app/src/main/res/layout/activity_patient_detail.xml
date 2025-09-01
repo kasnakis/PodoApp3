@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Γιατρός & Γενικά -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Θεράπων ιατρός" android:textStyle="bold" android:paddingTop="8dp"/>
+        <EditText android:id="@+id/etDoctorName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Όνομα ιατρού"/>
+        <EditText android:id="@+id/etDoctorPhone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Τηλέφωνο"/>
+        <EditText android:id="@+id/etDiagnosis" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Διάγνωση ιατρού"/>
+        <EditText android:id="@+id/etMedication" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Φαρμακευτική αγωγή"/>
+        <EditText android:id="@+id/etAllergies" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Αλλεργίες"/>
+
+        <!-- Διαβήτης -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Διαβητικός" android:textStyle="bold" android:paddingTop="8dp"/>
+        <Switch android:id="@+id/switchDiabetic" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ΝΑΙ/ΟΧΙ"/>
+        <Spinner android:id="@+id/spinnerDiabeticType" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        <EditText android:id="@+id/etInsulinNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Σημειώσεις ινσουλίνης"/>
+        <EditText android:id="@+id/etPillsNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Σημειώσεις χαπιών"/>
+
+        <!-- Στάση/παραμορφώσεις -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Στάση / Παραμορφώσεις" android:textStyle="bold" android:paddingTop="8dp"/>
+        <CheckBox android:id="@+id/cbMetatarsalDrop" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Πτώση μεταταρσίων"/>
+        <CheckBox android:id="@+id/cbValgus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Βλαισοποδία"/>
+        <CheckBox android:id="@+id/cbVarus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ραιβοποδία"/>
+        <CheckBox android:id="@+id/cbEquinus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ιπποποδία"/>
+        <CheckBox android:id="@+id/cbCavus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κοιλοποδία"/>
+        <CheckBox android:id="@+id/cbFlatfoot" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Πλατυποδία"/>
+        <CheckBox android:id="@+id/cbPronation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Πρηνισμός"/>
+        <CheckBox android:id="@+id/cbSupination" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Υπτιασμός"/>
+
+        <!-- Οίδημα/Κιρσοί -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Οίδημα και Κιρσοί" android:textStyle="bold" android:paddingTop="8dp"/>
+        <CheckBox android:id="@+id/cbEdemaLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Οίδημα Αριστερά"/>
+        <CheckBox android:id="@+id/cbEdemaRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Οίδημα Δεξιά"/>
+        <CheckBox android:id="@+id/cbVaricoseDorsalLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Ραχιαία Αριστερά"/>
+        <CheckBox android:id="@+id/cbVaricoseDorsalRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Ραχιαία Δεξιά"/>
+        <CheckBox android:id="@+id/cbVaricosePlantarLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Πελματιαία Αριστερά"/>
+        <CheckBox android:id="@+id/cbVaricosePlantarRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί Πελματιαία Δεξιά"/>
+
+        <!-- Νάρθηκας & Πάτοι -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Νάρθηκας και Ορθωτικοί Πάτοι" android:textStyle="bold" android:paddingTop="8dp"/>
+        <EditText android:id="@+id/etSplintNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Σημειώσεις νάρθηκα"/>
+        <Spinner android:id="@+id/spinnerOrthoticType" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+        <Button
+            android:id="@+id/btnSaveHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Αποθήκευση"
+            android:layout_marginTop="12dp"/>
+    </LinearLayout>
+</ScrollView>

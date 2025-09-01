@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.PodoApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Βασικά χρώματα -->
+        <item name="colorPrimary">#6200EE</item>
+        <item name="colorPrimaryVariant">#3700B3</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#03DAC5</item>
+        <item name="colorOnSecondary">#000000</item>
+
+        <!-- Χρώμα φόντου και κειμένου -->
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:textColor">#000000</item>
+
+        <!-- Απαραίτητο για MaterialDatePicker -->
+        <item name="materialCalendarTheme">@style/ThemeOverlay.MaterialCalendar</item>
+    </style>
+
+    <style name="ThemeOverlay.MaterialCalendar" parent="ThemeOverlay.MaterialComponents.MaterialCalendar"/>
+</resources>

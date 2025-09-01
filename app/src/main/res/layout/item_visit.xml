@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:elevation="4dp"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textViewReason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Λόγος"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewDiagnosis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Διάγνωση"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/textViewTreatment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Θεραπεία"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/textViewNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Σημειώσεις"
+            android:layout_marginTop="4dp" />
+
+        <!-- Φωτογραφίες -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewPhotos"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <!-- Κουμπιά ενέργειας -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/buttonEditVisit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Επεξεργασία" />
+
+            <Button
+                android:id="@+id/buttonDeleteVisit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Διαγραφή"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

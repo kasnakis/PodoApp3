@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PodoApp</string>
+
+    <!-- Αρχική σελίδα -->
+    <string name="welcome_message">Καλωσήρθατε στο PodoApp</string>
+    <string name="button_add_patient">Νέος Πελάτης</string>
+    <string name="button_view_patients">Μετάβαση στο Πελατολόγιο</string>
+
+    <!-- Προσθήκη πελάτη -->
+    <string name="add_patient_title">Προσθήκη Πελάτη</string>
+    <string name="hint_name">Όνομα</string>
+    <string name="hint_phone">Τηλέφωνο</string>
+    <string name="hint_notes">Σημειώσεις</string>
+    <string name="button_save">Αποθήκευση</string>
+
+    <!-- Λίστα πελατών -->
+    <string name="patients_list_title">Πελατολόγιο</string>
+    <string name="no_patients_found">Δεν υπάρχουν πελάτες καταχωρημένοι.</string>
+
+    <!-- Γενικά -->
+    <string name="error_required_field">Το πεδίο δεν μπορεί να είναι κενό</string>
+
+    <string-array name="sort_options">
+        <item>Αλφαβητικά (Α-Ω)</item>
+        <item>Αντίστροφα (Ω-Α)</item>
+    </string-array>
+
+    <string-array name="patient_categories">
+        <item>Κανονικός</item>
+        <item>Νέος</item>
+        <item>Έκτακτος</item>
+    </string-array>
+
+    <string-array name="category_filter_options">
+        <item>Όλες οι Κατηγορίες</item>
+        <item>Κανονικός</item>
+        <item>Νέος</item>
+        <item>Έκτακτος</item>
+    </string-array>
+
+</resources>
