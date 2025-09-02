@@ -1,0 +1,600 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "ae73587d52b5a645545319ca2e4f1b69",
+    "entities": [
+      {
+        "tableName": "patients",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fullName` TEXT NOT NULL, `phone` TEXT NOT NULL, `notes` TEXT, `cardCode` TEXT, `email` TEXT, `birthDate` TEXT, `profession` TEXT, `address` TEXT, `category` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullName",
+            "columnName": "fullName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "cardCode",
+            "columnName": "cardCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "birthDate",
+            "columnName": "birthDate",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "profession",
+            "columnName": "profession",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "category",
+            "columnName": "category",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "patient_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patientId` INTEGER NOT NULL, `doctorName` TEXT, `doctorPhone` TEXT, `doctorDiagnosis` TEXT, `medication` TEXT, `allergies` TEXT, `isDiabetic` INTEGER NOT NULL, `diabeticType` TEXT, `insulinNotes` TEXT, `pillsNotes` TEXT, `otherConditions` TEXT, `anticoagulantsNotes` TEXT, `contagiousDiseasesNotes` TEXT, `metatarsalDrop` INTEGER NOT NULL, `valgus` INTEGER NOT NULL, `varus` INTEGER NOT NULL, `equinus` INTEGER NOT NULL, `cavus` INTEGER NOT NULL, `flatfoot` INTEGER NOT NULL, `pronation` INTEGER NOT NULL, `supination` INTEGER NOT NULL, `leftHyperkeratosis` INTEGER NOT NULL, `leftHalluxValgus` INTEGER NOT NULL, `leftWarts` INTEGER NOT NULL, `leftDermatophytosis` INTEGER NOT NULL, `leftDorsalCallusesNotes` TEXT, `leftInterdigitalCallusesNotes` TEXT, `leftPlantarCallusesNotes` TEXT, `leftHammerToeNotes` TEXT, `leftOnychomycosisNotes` TEXT, `leftOnychocryptosisNotes` TEXT, `leftNailStatusNotes` TEXT, `rightHyperkeratosis` INTEGER NOT NULL, `rightHalluxValgus` INTEGER NOT NULL, `rightWarts` INTEGER NOT NULL, `rightDermatophytosis` INTEGER NOT NULL, `rightDorsalCallusesNotes` TEXT, `rightInterdigitalCallusesNotes` TEXT, `rightPlantarCallusesNotes` TEXT, `rightHammerToeNotes` TEXT, `rightOnychomycosisNotes` TEXT, `rightOnychocryptosisNotes` TEXT, `rightNailStatusNotes` TEXT, `edemaLeft` INTEGER NOT NULL, `edemaRight` INTEGER NOT NULL, `varicoseDorsalLeft` INTEGER NOT NULL, `varicoseDorsalRight` INTEGER NOT NULL, `varicosePlantarLeft` INTEGER NOT NULL, `varicosePlantarRight` INTEGER NOT NULL, `splintNotes` TEXT, `orthoticType` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "doctorPhone",
+            "columnName": "doctorPhone",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "doctorDiagnosis",
+            "columnName": "doctorDiagnosis",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "medication",
+            "columnName": "medication",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "allergies",
+            "columnName": "allergies",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isDiabetic",
+            "columnName": "isDiabetic",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "diabeticType",
+            "columnName": "diabeticType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "insulinNotes",
+            "columnName": "insulinNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "pillsNotes",
+            "columnName": "pillsNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "otherConditions",
+            "columnName": "otherConditions",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "anticoagulantsNotes",
+            "columnName": "anticoagulantsNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "contagiousDiseasesNotes",
+            "columnName": "contagiousDiseasesNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "metatarsalDrop",
+            "columnName": "metatarsalDrop",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "valgus",
+            "columnName": "valgus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "varus",
+            "columnName": "varus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "equinus",
+            "columnName": "equinus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cavus",
+            "columnName": "cavus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flatfoot",
+            "columnName": "flatfoot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pronation",
+            "columnName": "pronation",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supination",
+            "columnName": "supination",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leftHyperkeratosis",
+            "columnName": "leftHyperkeratosis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leftHalluxValgus",
+            "columnName": "leftHalluxValgus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leftWarts",
+            "columnName": "leftWarts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leftDermatophytosis",
+            "columnName": "leftDermatophytosis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "leftDorsalCallusesNotes",
+            "columnName": "leftDorsalCallusesNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "leftInterdigitalCallusesNotes",
+            "columnName": "leftInterdigitalCallusesNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "leftPlantarCallusesNotes",
+            "columnName": "leftPlantarCallusesNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "leftHammerToeNotes",
+            "columnName": "leftHammerToeNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "leftOnychomycosisNotes",
+            "columnName": "leftOnychomycosisNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "leftOnychocryptosisNotes",
+            "columnName": "leftOnychocryptosisNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "leftNailStatusNotes",
+            "columnName": "leftNailStatusNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rightHyperkeratosis",
+            "columnName": "rightHyperkeratosis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rightHalluxValgus",
+            "columnName": "rightHalluxValgus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rightWarts",
+            "columnName": "rightWarts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rightDermatophytosis",
+            "columnName": "rightDermatophytosis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rightDorsalCallusesNotes",
+            "columnName": "rightDorsalCallusesNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rightInterdigitalCallusesNotes",
+            "columnName": "rightInterdigitalCallusesNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rightPlantarCallusesNotes",
+            "columnName": "rightPlantarCallusesNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rightHammerToeNotes",
+            "columnName": "rightHammerToeNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rightOnychomycosisNotes",
+            "columnName": "rightOnychomycosisNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rightOnychocryptosisNotes",
+            "columnName": "rightOnychocryptosisNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "rightNailStatusNotes",
+            "columnName": "rightNailStatusNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "edemaLeft",
+            "columnName": "edemaLeft",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edemaRight",
+            "columnName": "edemaRight",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "varicoseDorsalLeft",
+            "columnName": "varicoseDorsalLeft",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "varicoseDorsalRight",
+            "columnName": "varicoseDorsalRight",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "varicosePlantarLeft",
+            "columnName": "varicosePlantarLeft",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "varicosePlantarRight",
+            "columnName": "varicosePlantarRight",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "splintNotes",
+            "columnName": "splintNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "orthoticType",
+            "columnName": "orthoticType",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_patient_history_patientId",
+            "unique": true,
+            "columnNames": [
+              "patientId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_patient_history_patientId` ON `${TABLE_NAME}` (`patientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "appointments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patientId` INTEGER NOT NULL, `dateTime` INTEGER NOT NULL, `notes` TEXT, `charge` TEXT, `treatment` TEXT, `status` TEXT NOT NULL, FOREIGN KEY(`patientId`) REFERENCES `patients`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateTime",
+            "columnName": "dateTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "charge",
+            "columnName": "charge",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "treatment",
+            "columnName": "treatment",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_appointments_patientId",
+            "unique": false,
+            "columnNames": [
+              "patientId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_appointments_patientId` ON `${TABLE_NAME}` (`patientId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "patients",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "patientId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "visits",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patientId` INTEGER NOT NULL, `appointmentId` INTEGER, `dateTime` INTEGER NOT NULL, `notes` TEXT, `charge` TEXT, `treatment` TEXT, FOREIGN KEY(`patientId`) REFERENCES `patients`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`appointmentId`) REFERENCES `appointments`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientId",
+            "columnName": "patientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appointmentId",
+            "columnName": "appointmentId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dateTime",
+            "columnName": "dateTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "charge",
+            "columnName": "charge",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "treatment",
+            "columnName": "treatment",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_visits_patientId",
+            "unique": false,
+            "columnNames": [
+              "patientId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_visits_patientId` ON `${TABLE_NAME}` (`patientId`)"
+          },
+          {
+            "name": "index_visits_appointmentId",
+            "unique": false,
+            "columnNames": [
+              "appointmentId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_visits_appointmentId` ON `${TABLE_NAME}` (`appointmentId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "patients",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "patientId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "appointments",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "appointmentId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ae73587d52b5a645545319ca2e4f1b69')"
+    ]
+  }
+}

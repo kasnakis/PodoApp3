@@ -1,6 +1,5 @@
 package com.kasal.podoapp.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -12,67 +11,110 @@ import com.kasal.podoapp.R
 import com.kasal.podoapp.data.PodologiaDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 class AppointmentCalendarActivity : AppCompatActivity() {
 
-    private lateinit var adapter: AppointmentAdapter // χρησιμοποίησε τον δικό σου adapter
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    private lateinit var adapter: AppointmentAdapter
     private lateinit var textSelectedDate: TextView
-    private var selectedDate: String = getTodayDate()
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var buttonPickDate: Button
+
+    // Κρατάμε την επιλεγμένη μέρα σε UTC 00:00 (millis)
+    private var selectedDayUtcMillis: Long = todayUtcStartMillis()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_appointment_calendar)
 
         textSelectedDate = findViewById(R.id.textSelectedDate)
-        val buttonPickDate = findViewById<Button>(R.id.buttonPickDate)
-        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewDayAppointments)
+        recyclerView = findViewById(R.id.recyclerViewDayAppointments)
+        buttonPickDate = findViewById(R.id.buttonPickDate)
 
-        adapter = AppointmentAdapter { /* actions αν έχεις */ }
+        adapter = AppointmentAdapter { /* onCompleted -> μελλοντικά actions */ }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        textSelectedDate.text = formatDateForDisplay(selectedDate)
-        loadAppointmentsWithNames(selectedDate)
+        textSelectedDate.text = formatDateForDisplay(selectedDayUtcMillis)
+        loadAppointmentsForDay(selectedDayUtcMillis)
 
         buttonPickDate.setOnClickListener {
             val picker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Επιλογή Ημερομηνίας")
-                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setSelection(selectedDayUtcMillis)
                 .build()
 
-            picker.show(supportFragmentManager, picker.toString())
-            picker.addOnPositiveButtonClickListener { selection ->
-                val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(selection))
-                selectedDate = date
-                textSelectedDate.text = formatDateForDisplay(date)
-                loadAppointmentsWithNames(date)
+            picker.show(supportFragmentManager, "date_picker")
+            picker.addOnPositiveButtonClickListener { selectionUtc ->
+                selectedDayUtcMillis = startOfUtcDay(selectionUtc)
+                textSelectedDate.text = formatDateForDisplay(selectedDayUtcMillis)
+                loadAppointmentsForDay(selectedDayUtcMillis)
             }
         }
     }
 
-    private fun loadAppointmentsWithNames(date: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val db = PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity)
-            val appointments = db.appointmentDao().getAppointmentsForDate(date).first()
-            val listWithNames = appointments.map { a ->
-                val p = db.patientDao().getPatientById(a.patientId)
-                a to (p?.fullName ?: "(χωρίς όνομα)")
+    private fun loadAppointmentsForDay(dayUtcStart: Long) {
+        val (start, end) = dayBoundsUtc(dayUtcStart)
+        val db = PodologiaDatabase.getDatabase(this)
+
+        scope.launch(Dispatchers.IO) {
+            // ΣΗΜΑΝΤΙΚΟ: εφόσον ο DAO σου ΔΕΝ γυρίζει Flow, απλά παίρνουμε τη λίστα
+            // Προσαρμόσου στο όνομα/signature του DAO:
+            //   π.χ. suspend fun getAppointmentsForDate(start: Long, end: Long): List<Appointment>
+            val list = db.appointmentDao().getAppointmentsForDate(start, end)
+
+            withContext(Dispatchers.Main) {
+                adapter.submit(list)
             }
-            withContext(Dispatchers.Main) { /* adapter.submitList(listWithNames) */ }
         }
     }
 
-    private fun getTodayDate(): String =
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
+    }
 
-    private fun formatDateForDisplay(date: String): String {
-        val input = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val output = SimpleDateFormat("EEEE dd/MM/yyyy", Locale("el"))
-        return try { output.format(input.parse(date)!!) } catch (_: Exception) { date }
+    /** UTC 00:00 για σήμερα */
+    private fun todayUtcStartMillis(): Long {
+        val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+    /** [startOfDayUtc, endOfDayUtcInclusive] για ένα UTC start-of-day */
+    private fun dayBoundsUtc(dayStartUtc: Long): Pair<Long, Long> {
+        val start = dayStartUtc
+        val end = dayStartUtc + (24L * 60L * 60L * 1000L) - 1L
+        return start to end
+    }
+
+    /** Γυρνά οποιοδήποτε UTC millis στο UTC 00:00 της ημέρας του */
+    private fun startOfUtcDay(anyUtcMillis: Long): Long {
+        val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = anyUtcMillis }
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+    /** Μορφοποίηση για εμφάνιση (ελληνικά) */
+    private fun formatDateForDisplay(dayStartUtc: Long): String {
+        val local = Date(dayStartUtc)
+        val fmt = SimpleDateFormat("EEEE dd/MM/yyyy", Locale("el"))
+        return fmt.format(local)
     }
 }

@@ -6,23 +6,28 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Placeholder header -->
+    <!-- Ημερομηνία που έχει επιλεγεί -->
     <TextView
-        android:id="@+id/tvCalendarTitle"
+        android:id="@+id/textSelectedDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ημερολόγιο Ραντεβού (προσωρινό)"
-        android:textStyle="bold"
+        android:text="Ημερομηνία"
         android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Επιλογή ημερομηνίας -->
+    <Button
+        android:id="@+id/buttonPickDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Επιλογή Ημερομηνίας"
         android:layout_marginBottom="12dp" />
 
-    <!-- Προσωρινό κενό περιεχόμενο
-         (Θα αντικατασταθεί με RecyclerView + DatePicker) -->
-    <TextView
-        android:id="@+id/tvCalendarEmpty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Εδώ θα εμφανίζονται τα ραντεβού της ημέρας."
-        android:textSize="16sp" />
-
+    <!-- Λίστα ραντεβού της ημέρας -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewDayAppointments"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 </LinearLayout>
