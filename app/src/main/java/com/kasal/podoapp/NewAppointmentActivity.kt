@@ -5,6 +5,7 @@ import android.app.TimePickerDialog
 import android.database.Cursor
 import android.os.Bundle
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.Appointment
@@ -23,7 +24,9 @@ class NewAppointmentActivity : AppCompatActivity() {
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    private lateinit var spinnerPatient: Spinner
+    // UI
+    private lateinit var textSelectedPatient: TextView
+    private lateinit var buttonPickPatient: Button
     private lateinit var editTextDate: EditText
     private lateinit var editTextTime: EditText
     private lateinit var editTextTreatment: EditText
@@ -31,15 +34,14 @@ class NewAppointmentActivity : AppCompatActivity() {
     private lateinit var editTextNotes: EditText
     private lateinit var buttonSave: Button
 
-    private val cal = Calendar.getInstance() // τοπική ζώνη
-
-    // Από προφίλ πελάτη μπορεί να έρθει preset
-    private var presetPatientId: Int = 0
-
-    // Λίστα για spinner
+    // Επιλογή πελάτη
+    private var selectedPatientId: Int = 0
+    private var selectedPatientName: String? = null
     private val patientIds = ArrayList<Int>()
     private val patientNames = ArrayList<String>()
 
+    // Ημερομηνία/ώρα
+    private val cal = Calendar.getInstance() // τοπική ζώνη
     private val fmtDate = SimpleDateFormat("dd/MM/yyyy", Locale("el"))
     private val fmtTime = SimpleDateFormat("HH:mm", Locale.getDefault())
 
@@ -47,10 +49,12 @@ class NewAppointmentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_appointment)
 
-        spinnerPatient = findViewById(R.id.spinnerPatient)
+        // Bind
+        textSelectedPatient = findViewById(R.id.textSelectedPatient)
+        buttonPickPatient = findViewById(R.id.buttonPickPatient)
         editTextDate = findViewById(R.id.editTextDate)
         editTextTime = findViewById(R.id.editTextTime)
-        editTextTreatment = findViewById(R.id.editTextType) // κρατάμε το ίδιο id που ήδη έχεις
+        editTextTreatment = findViewById(R.id.editTextType)
         editTextCharge = findViewById(R.id.editTextCharge)
         editTextNotes = findViewById(R.id.editTextNotes)
         buttonSave = findViewById(R.id.buttonSave)
@@ -59,28 +63,45 @@ class NewAppointmentActivity : AppCompatActivity() {
         editTextDate.setText(fmtDate.format(cal.time))
         editTextTime.setText(fmtTime.format(cal.time))
 
+        // Αν έρθει preset patientId από αλλού (π.χ. από προφίλ)
+        val presetPatientId = intent.getIntExtra("patientId", 0)
+        if (presetPatientId != 0) selectedPatientId = presetPatientId
+
+        // Φόρτωσε πελάτες για το dialog
+        scope.launch(Dispatchers.IO) {
+            loadPatientsForPicker()
+            withContext(Dispatchers.Main) {
+                // Αν έχουμε preset, βρες όνομα & δείξ' το
+                if (selectedPatientId != 0) {
+                    val idx = patientIds.indexOf(selectedPatientId)
+                    if (idx >= 0) {
+                        selectedPatientName = patientNames[idx]
+                        textSelectedPatient.text = selectedPatientName
+                    }
+                }
+            }
+        }
+
+        // Pickers
         editTextDate.setOnClickListener { showDatePicker() }
         editTextTime.setOnClickListener { showTimePicker() }
 
-        presetPatientId = intent.getIntExtra("patientId", 0)
-
-        // Γέμισμα spinner από DB (ωμά, για να μη δεσμευτούμε στο όνομα DAO μεθόδου)
-        scope.launch(Dispatchers.IO) {
-            loadPatientsForSpinner()
-            withContext(Dispatchers.Main) {
-                val adapter = ArrayAdapter(
-                    this@NewAppointmentActivity,
-                    android.R.layout.simple_spinner_dropdown_item,
-                    patientNames
-                )
-                spinnerPatient.adapter = adapter
-
-                // Αν έχουμε presetId, προεπιλογή
-                if (presetPatientId != 0) {
-                    val idx = patientIds.indexOf(presetPatientId)
-                    if (idx >= 0) spinnerPatient.setSelection(idx)
-                }
+        // Επιλογή πελάτη (dialog)
+        buttonPickPatient.setOnClickListener {
+            if (patientNames.isEmpty()) {
+                Toast.makeText(this, "Δεν βρέθηκαν πελάτες. Πρόσθεσε έναν πρώτα.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+            AlertDialog.Builder(this)
+                .setTitle("Επιλογή πελάτη")
+                .setItems(patientNames.toTypedArray()) { _, which ->
+                    if (which in patientIds.indices) {
+                        selectedPatientId = patientIds[which]
+                        selectedPatientName = patientNames[which]
+                        textSelectedPatient.text = selectedPatientName
+                    }
+                }
+                .show()
         }
 
         buttonSave.setOnClickListener { save() }
@@ -111,15 +132,13 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     private fun save() {
-        // patientId
-        val pos = spinnerPatient.selectedItemPosition
-        val patientId = if (pos in patientIds.indices) patientIds[pos] else 0
-        if (patientId == 0) {
+        // Έλεγχος πελάτη
+        if (selectedPatientId == 0) {
             Toast.makeText(this, "Επίλεξε πελάτη", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Συνδυάζουμε Date + Time σε ΤΟΠΙΚΟ ημερολόγιο → epoch ms
+        // Ημερομηνία/ώρα
         val dateStr = editTextDate.text?.toString()?.trim() ?: ""
         val timeStr = editTextTime.text?.toString()?.trim() ?: ""
         if (dateStr.isBlank() || timeStr.isBlank()) {
@@ -153,13 +172,14 @@ class NewAppointmentActivity : AppCompatActivity() {
         dateCal.set(Calendar.MILLISECOND, 0)
         val dateTimeMillis = dateCal.timeInMillis
 
+        // Λοιπά πεδία
         val treatment = editTextTreatment.text?.toString()?.trim().orEmpty()
         val charge = editTextCharge.text?.toString()?.trim().orEmpty()
         val notes = editTextNotes.text?.toString()?.trim().orEmpty()
 
         val appointment = Appointment(
             id = 0,
-            patientId = patientId,
+            patientId = selectedPatientId,
             dateTime = dateTimeMillis,
             status = "PENDING",
             treatment = treatment.ifBlank { null },
@@ -178,10 +198,12 @@ class NewAppointmentActivity : AppCompatActivity() {
     }
 
     /**
-     * Φορτώνει λίστα πελατών με SupportSQLiteDatabase.query(...) ώστε να μη δεσμευόμαστε σε συγκεκριμένο DAO.
-     * Προσπαθούμε πρώτα (id, firstName, lastName). Αν αποτύχει, δοκιμάζουμε (id, name).
+     * Φορτώνει λίστα πελατών με SupportSQLiteDatabase.query(...)
+     * 1) id, fullName
+     * 2) (fallback) id, firstName, lastName
+     * 3) (fallback) id, name
      */
-    private fun loadPatientsForSpinner() {
+    private fun loadPatientsForPicker() {
         patientIds.clear()
         patientNames.clear()
 
@@ -189,10 +211,10 @@ class NewAppointmentActivity : AppCompatActivity() {
 
         fun tryQuery(sql: String, binder: (Cursor) -> Unit): Boolean {
             return try {
-                val cursor = sdb.query(sql) // <-- ΟΧΙ rawQuery: SupportSQLiteDatabase.query
-                cursor.use { c ->
-                    while (c.moveToNext()) {
-                        binder(c)
+                val c = sdb.query(sql)
+                c.use { cursor ->
+                    while (cursor.moveToNext()) {
+                        binder(cursor)
                     }
                 }
                 true
@@ -201,26 +223,38 @@ class NewAppointmentActivity : AppCompatActivity() {
             }
         }
 
-        // 1η προσπάθεια: firstName/lastName
-        val ok1 = tryQuery(
-            "SELECT id, firstName, lastName FROM patients ORDER BY lastName, firstName"
+        // 1) fullName (το schema σου)
+        val okFull = tryQuery(
+            "SELECT id, fullName FROM patients ORDER BY fullName"
         ) { c ->
             val id = c.getInt(0)
-            val first = c.getString(1) ?: ""
-            val last = c.getString(2) ?: ""
+            val name = c.getString(1) ?: "Χωρίς όνομα"
             patientIds.add(id)
-            patientNames.add(listOf(first, last).filter { it.isNotBlank() }.joinToString(" "))
+            patientNames.add(name)
         }
 
-        if (!ok1) {
-            // 2η προσπάθεια: ενιαίο name
-            tryQuery(
-                "SELECT id, name FROM patients ORDER BY name"
+        // 2) firstName/lastName
+        if (!okFull) {
+            val okFirstLast = tryQuery(
+                "SELECT id, firstName, lastName FROM patients ORDER BY lastName, firstName"
             ) { c ->
                 val id = c.getInt(0)
-                val name = c.getString(1) ?: "Χωρίς όνομα"
+                val first = c.getString(1) ?: ""
+                val last = c.getString(2) ?: ""
                 patientIds.add(id)
-                patientNames.add(name)
+                patientNames.add(listOf(first, last).filter { it.isNotBlank() }.joinToString(" ").ifBlank { "Χωρίς όνομα" })
+            }
+
+            // 3) ενιαίο name
+            if (!okFirstLast) {
+                tryQuery(
+                    "SELECT id, name FROM patients ORDER BY name"
+                ) { c ->
+                    val id = c.getInt(0)
+                    val name = c.getString(1) ?: "Χωρίς όνομα"
+                    patientIds.add(id)
+                    patientNames.add(name)
+                }
             }
         }
     }

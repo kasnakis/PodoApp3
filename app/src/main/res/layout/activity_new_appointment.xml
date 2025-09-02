@@ -9,23 +9,40 @@
         android:padding="16dp"
         android:orientation="vertical">
 
+        <!-- Πελάτης -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Πελάτης"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
-        <Spinner
-            android:id="@+id/spinnerPatient"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
 
+            <TextView
+                android:id="@+id/textSelectedPatient"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="(Κανένας)"
+                android:paddingEnd="8dp" />
+
+            <Button
+                android:id="@+id/buttonPickPatient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Επιλογή" />
+        </LinearLayout>
+
+        <!-- Ημερομηνία -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ημερομηνία"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
         <EditText
             android:id="@+id/editTextDate"
             android:focusable="false"
@@ -33,13 +50,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="π.χ. 02/09/2025"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp" />
 
+        <!-- Ώρα -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ώρα"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
         <EditText
             android:id="@+id/editTextTime"
             android:focusable="false"
@@ -47,38 +65,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="π.χ. 10:30"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp" />
 
+        <!-- Θεραπεία -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Θεραπεία"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
         <EditText
             android:id="@+id/editTextType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="π.χ. καθαρισμός"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp" />
 
+        <!-- Χρέωση -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Χρέωση"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
         <EditText
             android:id="@+id/editTextCharge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
             android:hint="π.χ. 30€"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="12dp" />
 
+        <!-- Σημειώσεις -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Σημειώσεις"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
         <EditText
             android:id="@+id/editTextNotes"
             android:layout_width="match_parent"
@@ -86,12 +107,12 @@
             android:gravity="top|start"
             android:inputType="textMultiLine"
             android:hint="ό,τι χρειάζεται"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/buttonSave"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Αποθήκευση"/>
+            android:text="Αποθήκευση" />
     </LinearLayout>
 </ScrollView>
