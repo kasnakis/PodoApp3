@@ -1,5 +1,6 @@
 package com.kasal.podoapp.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -23,6 +24,9 @@ class VisitListActivity : AppCompatActivity() {
     private lateinit var list: ListView
     private val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
 
+    // A) Προσθήκη λίστας για τα visits
+    private var currentVisits: List<com.kasal.podoapp.data.Visit> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_visit_list)
@@ -39,19 +43,33 @@ class VisitListActivity : AppCompatActivity() {
 
         scope.launch {
             db.visitDao().forPatient(patientId).collectLatest { visits ->
-                val items = visits.map { v ->
-                    val whenStr = fmt.format(Date(v.dateTime))
-                    "$whenStr • ${v.treatment ?: "Θεραπεία -"} • ${v.charge ?: "Χρέωση -"}"
+                // B) Αποθήκευση λίστας και δημιουργία adapter
+                currentVisits = visits // η πλήρης λίστα Visit από Room
+
+                val items = currentVisits.map { v ->
+                    val whenStr = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale("el")).format(Date(v.dateTime))
+                    val charge = v.charge ?: "-"
+                    "• $whenStr  —  Χρέωση: $charge"
                 }
+
                 list.adapter = ArrayAdapter(
                     this@VisitListActivity,
                     android.R.layout.simple_list_item_1,
                     items
                 )
+
+                list.setOnItemClickListener { _, _, position, _ ->
+                    val selected = currentVisits.getOrNull(position) ?: return@setOnItemClickListener
+                    startActivity(
+                        Intent(this@VisitListActivity, VisitDetailActivity::class.java)
+                            .putExtra("visitId", selected.id)
+                    )
+                }
             }
         }
     }
 
+    // Γ) Cleanup
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
