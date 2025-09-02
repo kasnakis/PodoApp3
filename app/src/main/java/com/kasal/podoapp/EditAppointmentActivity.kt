@@ -1,11 +1,11 @@
 package com.kasal.podoapp.ui
 
+import android.app.AlertDialog
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.Appointment
 import com.kasal.podoapp.data.PodologiaDatabase
@@ -17,143 +17,142 @@ class EditAppointmentActivity : AppCompatActivity() {
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    private lateinit var textDate: TextView
-    private lateinit var textTime: TextView
-    private lateinit var btnPickDate: Button
-    private lateinit var btnPickTime: Button
+    private lateinit var textWhen: TextView
+    private lateinit var buttonPickDate: Button
+    private lateinit var buttonPickTime: Button
     private lateinit var spinnerStatus: Spinner
-    private lateinit var editNotes: EditText
     private lateinit var editTreatment: EditText
-    private lateinit var btnSave: Button
-    private lateinit var btnCancel: Button
+    private lateinit var editCharge: EditText
+    private lateinit var editNotes: EditText
+    private lateinit var buttonSave: Button
+    private lateinit var buttonDelete: Button
 
-    private var appt: Appointment? = null
-    private var workingDateTimeMillis: Long = System.currentTimeMillis()
+    private var appointment: Appointment? = null
+    private var selectedDateTime: Long = System.currentTimeMillis()
+
+    private val statuses = listOf("PENDING", "CONFIRMED", "COMPLETED", "CANCELLED")
+    private val fmtFull = SimpleDateFormat("EEEE dd/MM/yyyy, HH:mm", Locale("el"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_appointment)
 
-        textDate = findViewById(R.id.textDate)
-        textTime = findViewById(R.id.textTime)
-        btnPickDate = findViewById(R.id.buttonPickDate)
-        btnPickTime = findViewById(R.id.buttonPickTime)
+        textWhen = findViewById(R.id.textApptWhen)
+        buttonPickDate = findViewById(R.id.buttonPickDate)
+        buttonPickTime = findViewById(R.id.buttonPickTime)
         spinnerStatus = findViewById(R.id.spinnerStatus)
-        editNotes = findViewById(R.id.editNotes)
         editTreatment = findViewById(R.id.editTreatment)
-        btnSave = findViewById(R.id.buttonSave)
-        btnCancel = findViewById(R.id.buttonCancel)
+        editCharge = findViewById(R.id.editCharge)
+        editNotes = findViewById(R.id.editNotes)
+        buttonSave = findViewById(R.id.buttonSaveAppointment)
+        buttonDelete = findViewById(R.id.buttonDeleteAppointment)
 
-        // statuses
-        val statuses = listOf("SCHEDULED", "COMPLETED", "CANCELED")
-        val adapterStatuses: ArrayAdapter<String> =
-            ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, statuses)
-        spinnerStatus.adapter = adapterStatuses
+        spinnerStatus.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, statuses)
 
-        val id = intent.getIntExtra("appointmentId", -1)
-        if (id <= 0) {
-            Toast.makeText(this, "Άκυρο ραντεβού", Toast.LENGTH_LONG).show()
+        val apptId = intent.getIntExtra("appointmentId", -1)
+        if (apptId <= 0) {
+            Toast.makeText(this, "Άκυρο appointmentId", Toast.LENGTH_LONG).show()
             finish(); return
         }
 
         val db = PodologiaDatabase.getDatabase(this)
         scope.launch(Dispatchers.IO) {
-            appt = db.appointmentDao().getById(id)
+            appointment = db.appointmentDao().getById(apptId)
             withContext(Dispatchers.Main) {
-                if (appt == null) {
+                if (appointment == null) {
                     Toast.makeText(this@EditAppointmentActivity, "Δεν βρέθηκε ραντεβού", Toast.LENGTH_LONG).show()
                     finish()
                 } else {
-                    bindUi(appt!!, adapterStatuses)
+                    bindUi(appointment!!)
                 }
             }
         }
 
-        btnPickDate.setOnClickListener { openDatePicker() }
-        btnPickTime.setOnClickListener { openTimePicker() }
-
-        btnSave.setOnClickListener { saveChanges() }
-        btnCancel.setOnClickListener { finish() }
+        buttonPickDate.setOnClickListener { showDatePicker() }
+        buttonPickTime.setOnClickListener { showTimePicker() }
+        buttonSave.setOnClickListener { saveChanges() }
+        buttonDelete.setOnClickListener { confirmDelete() }
     }
 
-    private fun bindUi(a: Appointment, adapterStatuses: ArrayAdapter<String>) {
-        workingDateTimeMillis = a.dateTime
-        textDate.text = formatDate(workingDateTimeMillis)
-        textTime.text = formatTime(workingDateTimeMillis)
-        editNotes.setText(a.notes ?: "")
+    private fun bindUi(a: Appointment) {
+        selectedDateTime = a.dateTime
+        textWhen.text = fmtFull.format(Date(selectedDateTime))
         editTreatment.setText(a.treatment ?: "")
+        editCharge.setText(a.charge ?: "")
+        editNotes.setText(a.notes ?: "")
 
-        // set spinner to current status
-        val idx = adapterStatuses.getPosition(a.status ?: "SCHEDULED")
-        spinnerStatus.setSelection(if (idx >= 0) idx else 0)
+        val idx = statuses.indexOf(a.status).takeIf { it >= 0 } ?: 0
+        spinnerStatus.setSelection(idx)
     }
 
-    private fun openDatePicker() {
-        val picker = MaterialDatePicker.Builder.datePicker()
-            .setTitleText("Επιλογή Ημερομηνίας")
-            .setSelection(workingDateTimeMillis)
-            .build()
-        picker.show(supportFragmentManager, "date_picker")
-        picker.addOnPositiveButtonClickListener { selectionUtc ->
-            // Διατήρησε ώρα, άλλαξε μόνο ημερομηνία
-            val calSel = Calendar.getInstance().apply { timeInMillis = selectionUtc }
-            val cal = Calendar.getInstance().apply { timeInMillis = workingDateTimeMillis }
-            cal.set(Calendar.YEAR, calSel.get(Calendar.YEAR))
-            cal.set(Calendar.MONTH, calSel.get(Calendar.MONTH))
-            cal.set(Calendar.DAY_OF_MONTH, calSel.get(Calendar.DAY_OF_MONTH))
-            workingDateTimeMillis = cal.timeInMillis
-            textDate.text = formatDate(workingDateTimeMillis)
-        }
+    private fun showDatePicker() {
+        val cal = Calendar.getInstance().apply { timeInMillis = selectedDateTime }
+        DatePickerDialog(
+            this,
+            { _, y, m, d ->
+                cal.set(Calendar.YEAR, y)
+                cal.set(Calendar.MONTH, m)
+                cal.set(Calendar.DAY_OF_MONTH, d)
+                selectedDateTime = cal.timeInMillis
+                textWhen.text = fmtFull.format(Date(selectedDateTime))
+            },
+            cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
-    private fun openTimePicker() {
-        val cal = Calendar.getInstance().apply { timeInMillis = workingDateTimeMillis }
-        val picker = MaterialTimePicker.Builder()
-            .setTimeFormat(TimeFormat.CLOCK_24H)
-            .setHour(cal.get(Calendar.HOUR_OF_DAY))
-            .setMinute(cal.get(Calendar.MINUTE))
-            .setTitleText("Επιλογή Ώρας")
-            .build()
-        picker.show(supportFragmentManager, "time_picker")
-        picker.addOnPositiveButtonClickListener {
-            cal.set(Calendar.HOUR_OF_DAY, picker.hour)
-            cal.set(Calendar.MINUTE, picker.minute)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            workingDateTimeMillis = cal.timeInMillis
-            textTime.text = formatTime(workingDateTimeMillis)
-        }
+    private fun showTimePicker() {
+        val cal = Calendar.getInstance().apply { timeInMillis = selectedDateTime }
+        TimePickerDialog(
+            this,
+            { _, h, min ->
+                cal.set(Calendar.HOUR_OF_DAY, h)
+                cal.set(Calendar.MINUTE, min)
+                cal.set(Calendar.SECOND, 0)
+                cal.set(Calendar.MILLISECOND, 0)
+                selectedDateTime = cal.timeInMillis
+                textWhen.text = fmtFull.format(Date(selectedDateTime))
+            },
+            cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true
+        ).show()
     }
 
     private fun saveChanges() {
-        val a = appt ?: return
-        val newStatus = spinnerStatus.selectedItem?.toString() ?: "SCHEDULED"
-        val newNotes = editNotes.text?.toString()
-        val newTreatment = editTreatment.text?.toString()
-
+        val a = appointment ?: return
         val updated = a.copy(
-            dateTime = workingDateTimeMillis,
-            status = newStatus,
-            notes = newNotes,
-            treatment = newTreatment
+            dateTime = selectedDateTime,
+            status = spinnerStatus.selectedItem?.toString() ?: "PENDING",
+            treatment = editTreatment.text?.toString(),
+            charge = editCharge.text?.toString(),
+            notes = editNotes.text?.toString()
         )
-
-        val db = PodologiaDatabase.getDatabase(this)
         scope.launch(Dispatchers.IO) {
-            db.appointmentDao().update(updated)
+            PodologiaDatabase.getDatabase(this@EditAppointmentActivity).appointmentDao().update(updated)
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@EditAppointmentActivity, "Αποθηκεύτηκε", Toast.LENGTH_SHORT).show()
-                setResult(RESULT_OK)
                 finish()
             }
         }
     }
 
-    private fun formatDate(millis: Long): String =
-        SimpleDateFormat("EEEE dd/MM/yyyy", Locale("el")).format(Date(millis))
+    private fun confirmDelete() {
+        AlertDialog.Builder(this)
+            .setTitle("Διαγραφή ραντεβού")
+            .setMessage("Σίγουρα θέλεις να διαγράψεις αυτό το ραντεβού;")
+            .setPositiveButton("Ναι") { _, _ -> deleteAppointment() }
+            .setNegativeButton("Όχι", null)
+            .show()
+    }
 
-    private fun formatTime(millis: Long): String =
-        SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(millis))
+    private fun deleteAppointment() {
+        val a = appointment ?: return
+        scope.launch(Dispatchers.IO) {
+            PodologiaDatabase.getDatabase(this@EditAppointmentActivity).appointmentDao().delete(a)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@EditAppointmentActivity, "Διαγράφηκε", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
