@@ -1,93 +1,78 @@
-package com.kasal.podoapp
+package com.kasal.podoapp.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
-import com.kasal.podoapp.data.Appointment
-import com.kasal.podoapp.data.PodoAppDatabase
-import com.kasal.podoapp.ui.theme.PodoAppTheme
-import com.kasal.podoapp.ui.components.AppointmentCalendarScreen
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.kasal.podoapp.R
+import com.kasal.podoapp.data.PodologiaDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
-class AppointmentCalendarActivity : ComponentActivity() {
+class AppointmentCalendarActivity : AppCompatActivity() {
 
-    private lateinit var db: PodoAppDatabase
+    private lateinit var adapter: AppointmentAdapter // χρησιμοποίησε τον δικό σου adapter
+    private lateinit var textSelectedDate: TextView
+    private var selectedDate: String = getTodayDate()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_appointment_calendar)
 
-        db = PodoAppDatabase.getInstance(this)
-        val appointmentDao = db.appointmentDao()
-        val patientDao = db.patientDao()
+        textSelectedDate = findViewById(R.id.textSelectedDate)
+        val buttonPickDate = findViewById<Button>(R.id.buttonPickDate)
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewDayAppointments)
 
-        val selectedDate = LocalDate.now()
+        adapter = AppointmentAdapter { /* actions αν έχεις */ }
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
 
-        val appointmentsFlow = appointmentDao.getAppointmentsForDate(selectedDate)
+        textSelectedDate.text = formatDateForDisplay(selectedDate)
+        loadAppointmentsWithNames(selectedDate)
 
-        val appointmentsWithPatientNamesFlow: Flow<List<Pair<Appointment, String>>> =
-            appointmentsFlow.flatMapLatest { appointments ->
-                val flows = appointments.map { appointment ->
-                    patientDao.getPatientById(appointment.patientId).combine(appointmentDao.getAppointmentsForDate(selectedDate)) { patient, _ ->
-                        Pair(appointment, patient.firstName + " " + patient.lastName)
-                    }
-                }
-                combine(flows) { it.toList() }
-            }
+        buttonPickDate.setOnClickListener {
+            val picker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Επιλογή Ημερομηνίας")
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .build()
 
-        setContent {
-            PodoAppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val appointmentsWithPatientNames by appointmentsWithPatientNamesFlow.collectAsState(initial = emptyList())
-
-                    val appointments = appointmentsWithPatientNames.map { it.first }
-
-                    AppointmentCalendarScreen(
-                        appointments = appointments,
-                        onAddAppointment = { date ->
-                            // TODO: Add your logic here to add a new appointment
-                        },
-                        onAppointmentSelected = { appointment ->
-                            // TODO: Add your logic here when an appointment is selected
-                        },
-                        onConvertToVisit = { appointment ->
-                            Log.d("AppointmentCalendar", "Convert to visit: ${appointment.appointmentId}")
-                            val intent = Intent(this, VisitDetailActivity::class.java).apply {
-                                putExtra("patientId", appointment.patientId)
-                            }
-                            startActivity(intent)
-                        },
-                        onEdit = { appointment ->
-                            Log.d("AppointmentCalendar", "Edit appointment: ${appointment.appointmentId}")
-                            val intent = Intent(this, EditAppointmentActivity::class.java).apply {
-                                putExtra("appointmentId", appointment.appointmentId)
-                            }
-                            startActivity(intent)
-                        },
-                        onDelete = { appointment ->
-                            Log.d("AppointmentCalendar", "Delete appointment: ${appointment.appointmentId}")
-                            lifecycleScope.launch {
-                                appointmentDao.delete(appointment)
-                            }
-                        }
-                    )
-                }
+            picker.show(supportFragmentManager, picker.toString())
+            picker.addOnPositiveButtonClickListener { selection ->
+                val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(selection))
+                selectedDate = date
+                textSelectedDate.text = formatDateForDisplay(date)
+                loadAppointmentsWithNames(date)
             }
         }
+    }
+
+    private fun loadAppointmentsWithNames(date: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val db = PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity)
+            val appointments = db.appointmentDao().getAppointmentsForDate(date).first()
+            val listWithNames = appointments.map { a ->
+                val p = db.patientDao().getPatientById(a.patientId)
+                a to (p?.fullName ?: "(χωρίς όνομα)")
+            }
+            withContext(Dispatchers.Main) { /* adapter.submitList(listWithNames) */ }
+        }
+    }
+
+    private fun getTodayDate(): String =
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+
+    private fun formatDateForDisplay(date: String): String {
+        val input = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val output = SimpleDateFormat("EEEE dd/MM/yyyy", Locale("el"))
+        return try { output.format(input.parse(date)!!) } catch (_: Exception) { date }
     }
 }
