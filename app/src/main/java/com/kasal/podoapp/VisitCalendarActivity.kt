@@ -42,7 +42,7 @@ class VisitCalendarActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewDayVisits)
         buttonPickDate = findViewById(R.id.buttonPickDate)
 
-        adapter = VisitForDayAdapter { visit -> openPatientProfile(visit) }
+        adapter = VisitForDayAdapter { visit -> openVisitDetail(visit) }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -79,10 +79,10 @@ class VisitCalendarActivity : AppCompatActivity() {
         }
     }
 
-    private fun openPatientProfile(visit: Visit) {
+    private fun openVisitDetail(visit: Visit) {
         startActivity(
-            Intent(this, PatientDetailActivity::class.java)
-                .putExtra("patientId", visit.patientId)
+            Intent(this, VisitDetailActivity::class.java)
+                .putExtra("visitId", visit.id) // αν το primary key λέγεται αλλιώς, βάλε το σωστό property
         )
     }
 

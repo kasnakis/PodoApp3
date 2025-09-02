@@ -39,6 +39,7 @@
         <!-- Αν φτιάξεις VisitDetailActivity στο μέλλον:
         <activity android:name=".ui.VisitDetailActivity" />
         -->
+        <activity android:name=".ui.VisitDetailActivity" />
 
     </application>
 </manifest>
