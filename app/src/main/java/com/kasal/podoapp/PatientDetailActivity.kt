@@ -55,16 +55,11 @@ class PatientDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_patient_detail)
 
-        // Προτιμάμε να λαμβάνουμε patientId. Υποστηρίζουμε και fallback με "patient" (Serializable).
-        patientId = intent.getIntExtra("patientId", 0)
-        if (patientId == 0) {
-            val p = intent.getSerializableExtra("patient") as? Patient
-            if (p != null) patientId = p.id
-        }
-        if (patientId == 0) {
-            Toast.makeText(this, "Δεν βρέθηκε πελάτης", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+        // ΝΕΟ (safe):
+        patientId = intent.getIntExtra("patientId", -1)
+        if (patientId <= 0) {
+            Toast.makeText(this, "Άκυρο patientId", Toast.LENGTH_LONG).show()
+            finish(); return
         }
 
         bindViews()

@@ -50,6 +50,14 @@ class AppointmentActivity : AppCompatActivity() {
 
         recycler.layoutManager = LinearLayoutManager(this)
         adapter = AppointmentAdapter(
+            onEdit = { appt ->
+                // (προσωρινά) μπορείς να ανοίξεις EditActivity όταν ευθυγραμμιστεί το entity,
+                // προς το παρόν απλό feedback:
+                Toast.makeText(this, "Edit σύντομα διαθέσιμο", Toast.LENGTH_SHORT).show()
+            },
+            onDelete = { appt ->
+                scope.launch(Dispatchers.IO) { db.appointmentDao().deleteById(appt.id) }
+            },
             onCompleted = { appt -> completeAppointment(appt) }
         )
         recycler.adapter = adapter

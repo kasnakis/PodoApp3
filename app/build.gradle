@@ -24,19 +24,18 @@ android {
         }
     }
 
-    // Χρησιμοποιούμε ViewBinding (όχι Compose)
-    buildFeatures {
-        viewBinding true
-    }
+    buildFeatures { viewBinding true }
 
+    // ✅ Java 17
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
+    // ✅ Kotlin 17
     kotlinOptions {
-        jvmTarget = '1.8'
-        // προαιρετικό: μειώνει warnings του kapt όταν έχεις Kotlin 2.x
+        jvmTarget = '17'
+        // (προαιρετικό) αν θες να «σιγάσουν» warnings kapt:
         // languageVersion = '1.9'
     }
 }
@@ -49,7 +48,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
-    implementation 'androidx.fragment:fragment-ktx:1.6.2' // προαιρετικό
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
 
     // Room
     implementation 'androidx.room:room-runtime:2.6.1'
@@ -74,9 +73,5 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
-    arguments {
-        // Export Room schemas (δημιούργησε φάκελο: app/schemas)
-        arg("room.schemaLocation", "$projectDir/schemas")
-        arg("room.incremental", "true")
-    }
+    arguments { arg("room.incremental", "true") }
 }

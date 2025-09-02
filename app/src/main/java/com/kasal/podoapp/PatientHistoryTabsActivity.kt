@@ -39,17 +39,14 @@ class PatientHistoryTabsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_patient_history_tabs)
 
-        // Λήψη patientId (είτε άμεσο extra είτε μέσα από Serializable Patient)
-        patientId = intent.getIntExtra("patientId", 0)
-        val patientObj = intent.getSerializableExtra("patient") as? Patient
-        if (patientId == 0 && patientObj != null) {
-            patientId = patientObj.id
+        // ΝΕΟ (safe):
+        val patientId = intent.getIntExtra("patientId", -1)
+        if (patientId <= 0) {
+            Toast.makeText(this, "Άκυρο patientId", Toast.LENGTH_LONG).show()
+            finish(); return
         }
-        if (patientId == 0) {
-            Toast.makeText(this, "Δεν βρέθηκε πελάτης", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
+        this.patientId = patientId
+
 
         // Views
         tabLayout = findViewById(R.id.tabLayout)

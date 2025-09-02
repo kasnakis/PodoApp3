@@ -1,14 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="12dp"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
     android:background="?android:attr/selectableItemBackground">
 
-    <TextView android:id="@+id/tvApptWhen" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold"/>
-    <TextView android:id="@+id/tvApptStatus" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:id="@+id/textContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-    <TextView android:id="@+id/tvApptCharge" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <TextView android:id="@+id/tvApptTreatment" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/tvApptWhen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold" />
 
-    <Button android:id="@+id/btnMarkCompleted" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ολοκληρώθηκε" android:layout_marginTop="6dp"/>
-</LinearLayout>
+        <TextView
+            android:id="@+id/tvApptStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvApptCharge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvApptTreatment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/btnMore"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_more_vert_24"
+        android:contentDescription="@string/more_actions"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:tint="?attr/colorOnSurface"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="8dp" />
+
+    <Button
+        android:id="@+id/btnMarkCompleted"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ολοκληρώθηκε"
+        android:layout_below="@id/textContainer"
+        android:layout_marginTop="6dp" />
+
+</RelativeLayout>

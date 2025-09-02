@@ -20,6 +20,8 @@
 
     <!-- Γενικά -->
     <string name="error_required_field">Το πεδίο δεν μπορεί να είναι κενό</string>
+    <string name="more_actions">Περισσότερες ενέργειες</string>
+
 
     <string-array name="sort_options">
         <item>Αλφαβητικά (Α-Ω)</item>
