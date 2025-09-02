@@ -28,6 +28,9 @@ interface AppointmentDao {
     @Query("UPDATE appointments SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: Int, status: String)
 
+    // Προαιρετικό syntactic sugar για τη ροή "ολοκλήρωση ραντεβού"
+    suspend fun markCompleted(id: Int) = updateStatus(id, "COMPLETED")
+
     @Query("""
         SELECT * FROM appointments
         WHERE patientId = :patientId
@@ -35,6 +38,8 @@ interface AppointmentDao {
     """)
     fun forPatient(patientId: Int): Flow<List<Appointment>>
 
+    // Χρησιμοποιείται από το AppointmentCalendarActivity:
+    // ζητάμε ραντεβού σε εύρος ημέρας [start, end] (UTC millis)
     @Query("""
         SELECT * FROM appointments
         WHERE dateTime BETWEEN :start AND :end

@@ -26,10 +26,15 @@ interface VisitDao {
     """)
     fun forPatient(patientId: Int): Flow<List<Visit>>
 
+    // Για προβολή ημερολογίου επισκέψεων: εύρος ημέρας [start, end] (UTC millis)
     @Query("""
         SELECT * FROM visits
         WHERE dateTime BETWEEN :start AND :end
         ORDER BY dateTime ASC
     """)
     suspend fun getVisitsForDate(start: Long, end: Long): List<Visit>
+
+    // (Προαιρετικό) Αν χρειαστεί να ανοίγεις VisitDetail με id
+    @Query("SELECT * FROM visits WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Long): Visit?
 }

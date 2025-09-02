@@ -3,12 +3,15 @@ package com.kasal.podoapp.ui
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.kasal.podoapp.R
+import com.kasal.podoapp.data.Appointment
 import com.kasal.podoapp.data.PodologiaDatabase
+import com.kasal.podoapp.data.Visit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -41,7 +44,10 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewDayAppointments)
         buttonPickDate = findViewById(R.id.buttonPickDate)
 
-        adapter = AppointmentAdapter { /* onCompleted -> μελλοντικά actions */ }
+        // Το AppointmentAdapter έχει κουμπί "Ολοκληρώθηκε"
+        adapter = AppointmentAdapter { appt ->
+            markAsCompletedAndConvert(appt)
+        }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -63,18 +69,57 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Φόρτωση ραντεβού για την επιλεγμένη ημέρα.
+     * Ο DAO σου περιμένει start/end millis σε εύρος ημέρας.
+     */
     private fun loadAppointmentsForDay(dayUtcStart: Long) {
         val (start, end) = dayBoundsUtc(dayUtcStart)
         val db = PodologiaDatabase.getDatabase(this)
 
         scope.launch(Dispatchers.IO) {
-            // ΣΗΜΑΝΤΙΚΟ: εφόσον ο DAO σου ΔΕΝ γυρίζει Flow, απλά παίρνουμε τη λίστα
-            // Προσαρμόσου στο όνομα/signature του DAO:
-            //   π.χ. suspend fun getAppointmentsForDate(start: Long, end: Long): List<Appointment>
             val list = db.appointmentDao().getAppointmentsForDate(start, end)
-
             withContext(Dispatchers.Main) {
                 adapter.submit(list)
+            }
+        }
+    }
+
+    /**
+     * Μαρκάρει το ραντεβού ως COMPLETED & δημιουργεί Visit,
+     * έπειτα κάνει refresh τη λίστα της ημέρας.
+     */
+    private fun markAsCompletedAndConvert(appt: Appointment) {
+        val db = PodologiaDatabase.getDatabase(this)
+        scope.launch(Dispatchers.IO) {
+            try {
+                // 1) Μαρκάρισμα ραντεβού
+                db.appointmentDao().updateStatus(appt.id, "COMPLETED")
+
+                // 2) Δημιουργία επίσκεψης (Visit)
+                db.visitDao().insert(
+                    Visit(
+                        patientId = appt.patientId,
+                        appointmentId = appt.id,
+                        dateTime = System.currentTimeMillis(),
+                        notes = appt.notes,
+                        charge = appt.charge,
+                        treatment = appt.treatment
+                    )
+                )
+
+                // 3) Refresh λίστας για την ίδια ημέρα
+                val (start, end) = dayBoundsUtc(selectedDayUtcMillis)
+                val list = db.appointmentDao().getAppointmentsForDate(start, end)
+
+                withContext(Dispatchers.Main) {
+                    adapter.submit(list)
+                    Toast.makeText(this@AppointmentCalendarActivity, "Μετατράπηκε σε επίσκεψη", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AppointmentCalendarActivity, "Σφάλμα: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }

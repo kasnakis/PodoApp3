@@ -1,40 +1,51 @@
 package com.kasal.podoapp.data
 
-import android.content.Context
 import androidx.room.withTransaction
 
 object AppointmentVisitOps {
 
-    const val STATUS_DONE = "DONE" // label για “πραγματοποιήθηκε”
-
     /**
-     * Μετατρέπει ένα ραντεβού σε επίσκεψη σε μία Room transaction.
-     * @param actualDateTime αν είναι null, χρησιμοποιούμε το dateTime του ραντεβού
-     * @return το id της νέας επίσκεψης
+     * Μετατρέπει ένα Appointment σε Visit και μαρκάρει το ραντεβού ως COMPLETED.
+     * Επιστρέφει το visitId.
+     *
+     * Συμβατό με Visit(
+     *   patientId: Int,
+     *   appointmentId: Int,
+     *   dateTime: Long,
+     *   notes: String?,
+     *   charge: <τύπος σου>,
+     *   treatment: String?
+     * )
      */
     suspend fun convertAppointmentToVisit(
-        context: Context,
-        appointmentId: Int,
-        actualDateTime: Long? = null
+        db: PodologiaDatabase,
+        appt: Appointment
     ): Long {
-        val db = PodologiaDatabase.getDatabase(context)
         return db.withTransaction {
-            val appt = db.appointmentDao().getById(appointmentId)
-                ?: error("Appointment $appointmentId δεν βρέθηκε")
-
-            val visitId = db.visitDao().insert(
-                Visit(
-                    id = 0,
-                    patientId = appt.patientId,
-                    appointmentId = appt.id,
-                    dateTime = actualDateTime ?: appt.dateTime,
-                    notes = appt.notes,
-                    charge = appt.charge,
-                    treatment = appt.treatment
-                )
+            val visit = Visit(
+                patientId = appt.patientId,
+                appointmentId = appt.id,
+                // Χρησιμοποιούμε την ώρα του ραντεβού για τη νέα επίσκεψη
+                dateTime = appt.dateTime,
+                notes = appt.notes,
+                charge = appt.charge,
+                treatment = appt.treatment
             )
-            db.appointmentDao().updateStatus(appointmentId, STATUS_DONE)
+            val visitId = db.visitDao().insert(visit)
+            db.appointmentDao().updateStatus(appt.id, "COMPLETED")
             visitId
         }
+    }
+
+    /**
+     * Εναλλακτική: δέχεται appointmentId, το φορτώνει και το μετατρέπει.
+     */
+    suspend fun convertAppointmentIdToVisit(
+        db: PodologiaDatabase,
+        appointmentId: Int
+    ): Long {
+        val appt = db.appointmentDao().getById(appointmentId)
+            ?: error("Appointment $appointmentId not found")
+        return convertAppointmentToVisit(db, appt)
     }
 }
