@@ -12,6 +12,8 @@ import com.kasal.podoapp.data.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 import java.util.*
+import android.content.Intent
+
 
 class AppointmentActivity : AppCompatActivity() {
 
@@ -116,8 +118,11 @@ class AppointmentActivity : AppCompatActivity() {
 
     private fun completeAppointment(appt: Appointment) {
         scope.launch(Dispatchers.IO) {
+            val db = PodologiaDatabase.getDatabase(this@AppointmentActivity)
+            // 1) Μαρκάρισμα ραντεβού
             db.appointmentDao().updateStatus(appt.id, "COMPLETED")
-            db.visitDao().insert(
+            // 2) Δημιουργία επίσκεψης και πάρε το id
+            val newVisitId = db.visitDao().insert(
                 Visit(
                     patientId = appt.patientId,
                     appointmentId = appt.id,
@@ -127,8 +132,14 @@ class AppointmentActivity : AppCompatActivity() {
                     treatment = appt.treatment
                 )
             )
-        }.invokeOnCompletion {
-            runOnUiThread { Toast.makeText(this, "Ολοκληρώθηκε και δημιουργήθηκε επίσκεψη", Toast.LENGTH_SHORT).show() }
+            // 3) Άνοιγμα VisitDetail στο Main
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@AppointmentActivity, "Ολοκληρώθηκε και δημιουργήθηκε επίσκεψη", Toast.LENGTH_SHORT).show()
+                startActivity(
+                    Intent(this@AppointmentActivity, VisitDetailActivity::class.java)
+                        .putExtra("visitId", newVisitId.toInt())
+                )
+            }
         }
     }
 

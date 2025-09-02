@@ -2,12 +2,15 @@ package com.kasal.podoapp.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.PodologiaDatabase
+import com.kasal.podoapp.data.Visit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,8 +27,9 @@ class VisitListActivity : AppCompatActivity() {
     private lateinit var list: ListView
     private val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
 
-    // A) Προσθήκη λίστας για τα visits
-    private var currentVisits: List<com.kasal.podoapp.data.Visit> = emptyList()
+    // Κρατάμε τη λίστα για clicks
+    private var currentVisits: List<Visit> = emptyList()
+    private lateinit var adapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,35 +45,77 @@ class VisitListActivity : AppCompatActivity() {
         list = findViewById(R.id.listViewVisits)
         val db = PodologiaDatabase.getDatabase(this)
 
+        // Συλλογή visits σε πραγματικό χρόνο
         scope.launch {
             db.visitDao().forPatient(patientId).collectLatest { visits ->
-                // B) Αποθήκευση λίστας και δημιουργία adapter
-                currentVisits = visits // η πλήρης λίστα Visit από Room
-
-                val items = currentVisits.map { v ->
-                    val whenStr = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale("el")).format(Date(v.dateTime))
-                    val charge = v.charge ?: "-"
-                    "• $whenStr  —  Χρέωση: $charge"
+                currentVisits = visits
+                val items = visits.map { v ->
+                    val whenStr = fmt.format(Date(v.dateTime))
+                    "$whenStr • ${v.treatment ?: "Θεραπεία -"} • ${v.charge ?: "Χρέωση -"}"
                 }
-
-                list.adapter = ArrayAdapter(
+                adapter = ArrayAdapter(
                     this@VisitListActivity,
                     android.R.layout.simple_list_item_1,
                     items
                 )
-
-                list.setOnItemClickListener { _, _, position, _ ->
-                    val selected = currentVisits.getOrNull(position) ?: return@setOnItemClickListener
-                    startActivity(
-                        Intent(this@VisitListActivity, VisitDetailActivity::class.java)
-                            .putExtra("visitId", selected.id)
-                    )
-                }
+                list.adapter = adapter
             }
+        }
+
+        // Tap → VisitDetail
+        list.setOnItemClickListener { _, _, position, _ ->
+            val v = currentVisits.getOrNull(position) ?: return@setOnItemClickListener
+            startActivity(
+                Intent(this, VisitDetailActivity::class.java)
+                    .putExtra("visitId", v.id)
+            )
+        }
+
+        // Long-press → PopupMenu (Επεξεργασία / Διαγραφή)
+        list.setOnItemLongClickListener { parent, view, position, _ ->
+            showVisitItemMenu(view, position)
+            true
         }
     }
 
-    // Γ) Cleanup
+    private fun showVisitItemMenu(anchor: View, position: Int) {
+        val v = currentVisits.getOrNull(position) ?: return
+        val popup = PopupMenu(this, anchor)
+        popup.menuInflater.inflate(R.menu.menu_visit_item, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_edit_visit -> {
+                    startActivity(
+                        Intent(this, VisitDetailActivity::class.java)
+                            .putExtra("visitId", v.id)
+                    )
+                    true
+                }
+                R.id.action_delete_visit -> {
+                    confirmDelete(v)
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun confirmDelete(v: Visit) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Διαγραφή επίσκεψης")
+            .setMessage("Σίγουρα θέλεις να διαγράψεις αυτή την επίσκεψη;")
+            .setPositiveButton("Ναι") { _, _ ->
+                scope.launch(Dispatchers.IO) {
+                    PodologiaDatabase.getDatabase(this@VisitListActivity)
+                        .visitDao().delete(v)
+                    // Δεν χρειάζεται χειροκίνητο refresh: το Flow θα εκπέμψει νέα λίστα
+                }
+            }
+            .setNegativeButton("Όχι", null)
+            .show()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         scope.cancel()
