@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Γραμμή ενεργειών πελάτη -->
         <LinearLayout
             android:id="@+id/patientActionsRow"
             android:layout_width="match_parent"
@@ -41,7 +40,8 @@
                 android:text="Νέο Ραντεβού" />
         </LinearLayout>
 
-        <!-- ΝΕΟ: Επικεφαλίδα με το ονοματεπώνυμο του πελάτη -->
+        <include layout="@layout/include_patient_photos" />
+
         <TextView
             android:id="@+id/textPatientNameHeader"
             android:layout_width="match_parent"

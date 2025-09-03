@@ -1,18 +1,28 @@
 package com.kasal.podoapp.ui
 
+import android.Manifest
+import android.content.ContentValues
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.kasal.podoapp.R
+import com.kasal.podoapp.PatientPhotoAdapter
 import com.kasal.podoapp.data.Patient
 import com.kasal.podoapp.data.PatientHistory
+import com.kasal.podoapp.data.PatientPhoto
 import com.kasal.podoapp.data.PodologiaDatabase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.CoroutineScope
 
 class PatientDetailActivity : AppCompatActivity() {
 
@@ -22,7 +32,7 @@ class PatientDetailActivity : AppCompatActivity() {
     // Header name
     private lateinit var textPatientNameHeader: TextView
 
-    // Views
+    // Views (History form)
     private lateinit var etDoctorName: EditText
     private lateinit var etDoctorPhone: EditText
     private lateinit var etDiagnosis: EditText
@@ -57,8 +67,52 @@ class PatientDetailActivity : AppCompatActivity() {
     private lateinit var btnPatientAppointments: Button
     private lateinit var btnNewAppointment: Button
 
+    // Photos UI
+    private lateinit var btnAddFromCamera: Button
+    private lateinit var btnAddFromGallery: Button
+    private lateinit var recyclerPatientPhotos: RecyclerView
+    private lateinit var photoAdapter: PatientPhotoAdapter
+    private var pendingCameraUri: Uri? = null
+
     private val orthoticTypes = arrayOf("NONE", "STOCK", "CUSTOM")
     private val diabeticTypes = arrayOf("", "TYPE_1", "TYPE_2")
+
+    // Permissions (images)
+    private val requestPhotosPerms = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        val granted = grants.values.all { it }
+        if (!granted) {
+            Toast.makeText(this, "Δεν δόθηκε άδεια για πρόσβαση σε εικόνες", Toast.LENGTH_SHORT).show()
+        } else {
+            openGalleryPicker()
+        }
+    }
+
+    // Gallery picker
+    private val pickImage = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            savePhotoUri(uri)
+        }
+    }
+
+    // Camera capture (with EXTRA_OUTPUT)
+    private val takePicture = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success ->
+        val uri = pendingCameraUri
+        if (success && uri != null) {
+            savePhotoUri(uri)
+        } else {
+            // καθάρισμα του entry σε περίπτωση ακύρωσης
+            if (uri != null) {
+                contentResolver.delete(uri, null, null)
+            }
+        }
+        pendingCameraUri = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,29 +132,23 @@ class PatientDetailActivity : AppCompatActivity() {
             return
         }
 
-        // Bind βασικών views (συμπεριλαμβανομένου του header ονόματος)
+        // Bind όλων των views (συμπεριλαμβανομένης της ενότητας φωτογραφιών)
         bindViews()
 
-        // Θέτουμε τίτλο & header name
+        // Τίτλος & header
         setPatientNameInTitleAndHeader(patientId)
 
-        // Κουμπιά ενεργειών
-        btnVisitHistory = findViewById(R.id.btnVisitHistory)
-        btnPatientAppointments = findViewById(R.id.btnPatientAppointments)
-        btnNewAppointment = findViewById(R.id.btnNewAppointment)
-
+        // Κουμπιά πλοήγησης
         btnVisitHistory.setOnClickListener {
             val i = Intent(this, VisitListActivity::class.java)
             i.putExtra("patientId", patientId)
             startActivity(i)
         }
-
         btnPatientAppointments.setOnClickListener {
             val i = Intent(this, AppointmentActivity::class.java)
             i.putExtra("patientId", patientId)
             startActivity(i)
         }
-
         btnNewAppointment.setOnClickListener {
             val i = Intent(this, NewAppointmentActivity::class.java)
             i.putExtra("patientId", patientId)
@@ -133,6 +181,16 @@ class PatientDetailActivity : AppCompatActivity() {
                 }
             }
         }
+
+        // Photos section
+        photoAdapter = PatientPhotoAdapter { /* TODO: fullscreen viewer αν χρειαστεί */ }
+        recyclerPatientPhotos.layoutManager = GridLayoutManager(this, 3)
+        recyclerPatientPhotos.adapter = photoAdapter
+
+        btnAddFromGallery.setOnClickListener { ensurePhotosPermissionThenOpenGallery() }
+        btnAddFromCamera.setOnClickListener { captureFromCamera() }
+
+        observePhotos()
     }
 
     // Helper: εντοπίζει CheckBox δοκιμάζοντας πιθανά ids (τρέχον + παλιά/typos)
@@ -199,6 +257,15 @@ class PatientDetailActivity : AppCompatActivity() {
         spinnerOrthoticType = findViewById(R.id.spinnerOrthoticType)
 
         btnSave = findViewById(R.id.btnSaveHistory)
+
+        btnVisitHistory = findViewById(R.id.btnVisitHistory)
+        btnPatientAppointments = findViewById(R.id.btnPatientAppointments)
+        btnNewAppointment = findViewById(R.id.btnNewAppointment)
+
+        // Photos section
+        btnAddFromCamera = findViewById(R.id.btnAddFromCamera)
+        btnAddFromGallery = findViewById(R.id.btnAddFromGallery)
+        recyclerPatientPhotos = findViewById(R.id.recyclerPatientPhotos)
     }
 
     private fun setupSpinners() {
@@ -279,5 +346,64 @@ class PatientDetailActivity : AppCompatActivity() {
             splintNotes = etSplintNotes.text.toString().trim().ifEmpty { null },
             orthoticType = orthoticTypes[spinnerOrthoticType.selectedItemPosition]
         )
+    }
+
+    /** ---------------- Photos: observe / permissions / gallery / camera / save ---------------- **/
+
+    private fun observePhotos() {
+        val db = PodologiaDatabase.getDatabase(this)
+        lifecycleScope.launch {
+            db.patientPhotoDao().observePhotosForPatient(patientId).collect { list ->
+                photoAdapter.submitList(list)
+            }
+        }
+    }
+
+    private fun ensurePhotosPermissionThenOpenGallery() {
+        val perms = if (Build.VERSION.SDK_INT >= 33) {
+            arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        requestPhotosPerms.launch(perms)
+    }
+
+    private fun openGalleryPicker() {
+        pickImage.launch("image/*")
+    }
+
+    private fun captureFromCamera() {
+        val now = System.currentTimeMillis()
+        val name = "podoapp_${patientId}_$now.jpg"
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, name)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.DATE_TAKEN, now)
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/PodoApp")
+            put(MediaStore.Images.Media.IS_PENDING, 0)
+        }
+        val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        if (uri == null) {
+            Toast.makeText(this, "Αποτυχία δημιουργίας αρχείου εικόνας", Toast.LENGTH_SHORT).show()
+            return
+        }
+        pendingCameraUri = uri
+        takePicture.launch(uri)
+    }
+
+    private fun savePhotoUri(uri: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = PodologiaDatabase.getDatabase(this@PatientDetailActivity)
+            db.patientPhotoDao().insert(
+                PatientPhoto(
+                    patientId = patientId,
+                    photoUri = uri.toString(),
+                    takenAtMillis = System.currentTimeMillis()
+                )
+            )
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@PatientDetailActivity, "Προστέθηκε φωτογραφία", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

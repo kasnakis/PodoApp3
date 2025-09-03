@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -36,9 +40,6 @@
         <activity android:name=".ui.VisitListActivity" />
         <activity android:name=".ui.VisitCalendarActivity" />
 
-        <!-- Αν φτιάξεις VisitDetailActivity στο μέλλον:
-        <activity android:name=".ui.VisitDetailActivity" />
-        -->
         <activity android:name=".ui.VisitDetailActivity" />
 
     </application>
