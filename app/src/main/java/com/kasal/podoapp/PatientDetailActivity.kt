@@ -1,6 +1,7 @@
 package com.kasal.podoapp.ui
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Intent
 import android.net.Uri
@@ -23,6 +24,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+
 
 class PatientDetailActivity : AppCompatActivity() {
 
@@ -94,7 +98,7 @@ class PatientDetailActivity : AppCompatActivity() {
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            savePhotoUri(uri)
+            importAndSaveFromUri(uri) // ✅ αντί για savePhotoUri
         }
     }
 
@@ -113,6 +117,27 @@ class PatientDetailActivity : AppCompatActivity() {
         }
         pendingCameraUri = null
     }
+
+    // Νέοι launchers για τις άδειες της κάμερας
+    private val requestCameraPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                startCameraNow() // προχώρα στη λήψη
+            } else {
+                Toast.makeText(this, "Η κάμερα δεν έχει άδεια.", Toast.LENGTH_LONG).show()
+            }
+        }
+
+    private val requestMultiplePermissions =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val allGranted = result.values.all { it }
+            if (allGranted) {
+                startCameraNow()
+            } else {
+                Toast.makeText(this, "Χρειάζονται άδειες κάμερας/αποθήκευσης.", Toast.LENGTH_LONG).show()
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,7 +208,15 @@ class PatientDetailActivity : AppCompatActivity() {
         }
 
         // Photos section
-        photoAdapter = PatientPhotoAdapter { /* TODO: fullscreen viewer αν χρειαστεί */ }
+        photoAdapter = PatientPhotoAdapter(
+            onClick = { photo ->
+                val i = Intent(this, FullscreenPhotoActivity::class.java)
+                i.putExtra("photoUri", photo.photoUri)
+                i.putExtra("takenAtMillis", photo.takenAtMillis)
+                startActivity(i)
+            },
+            onLongClick = { photo -> confirmDeletePhoto(photo) }
+        )
         recyclerPatientPhotos.layoutManager = GridLayoutManager(this, 3)
         recyclerPatientPhotos.adapter = photoAdapter
 
@@ -191,6 +224,7 @@ class PatientDetailActivity : AppCompatActivity() {
         btnAddFromCamera.setOnClickListener { captureFromCamera() }
 
         observePhotos()
+        migrateOldPickerUrisIfAny()
     }
 
     // Helper: εντοπίζει CheckBox δοκιμάζοντας πιθανά ids (τρέχον + παλιά/typos)
@@ -373,21 +407,81 @@ class PatientDetailActivity : AppCompatActivity() {
     }
 
     private fun captureFromCamera() {
+        // Android 13+ (API 33+): ζητάμε μόνο CAMERA
+        if (Build.VERSION.SDK_INT >= 33) {
+            val camGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            if (!camGranted) {
+                requestCameraPermission.launch(Manifest.permission.CAMERA)
+                return
+            }
+            startCameraNow()
+            return
+        }
+
+        // Android 10-12 (API 29..32): συνήθως φτάνει η CAMERA (χρησιμοποιούμε MediaStore), αλλά αν χρειαστεί ανά ROM
+        if (Build.VERSION.SDK_INT in 29..32) {
+            val needs = mutableListOf<String>()
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                needs += Manifest.permission.CAMERA
+            }
+            // σε κάποιες ROMs μπορεί να ζητηθεί και read:
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                needs += Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+            if (needs.isNotEmpty()) {
+                requestMultiplePermissions.launch(needs.toTypedArray())
+                return
+            }
+            startCameraNow()
+            return
+        }
+
+        // Android 7–9 (API 24..28): χρειάζεται συχνά ΚΑΙ WRITE_EXTERNAL_STORAGE για το insert στο MediaStore
+        val needs = mutableListOf<String>()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            needs += Manifest.permission.CAMERA
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            needs += Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            needs += Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+        if (needs.isNotEmpty()) {
+            requestMultiplePermissions.launch(needs.toTypedArray())
+            return
+        }
+        startCameraNow()
+    }
+
+    private fun startCameraNow() {
         val now = System.currentTimeMillis()
         val name = "podoapp_${patientId}_$now.jpg"
+
+        val collection = if (Build.VERSION.SDK_INT >= 29) {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        } else {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, name)
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.DATE_TAKEN, now)
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/PodoApp")
-            put(MediaStore.Images.Media.IS_PENDING, 0)
+            if (Build.VERSION.SDK_INT >= 29) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/PodoApp")
+                put(MediaStore.Images.Media.DATE_TAKEN, now)
+                put(MediaStore.Images.Media.DATE_ADDED, now / 1000)
+            }
         }
-        val uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+
+        val uri = contentResolver.insert(collection, values)
         if (uri == null) {
             Toast.makeText(this, "Αποτυχία δημιουργίας αρχείου εικόνας", Toast.LENGTH_SHORT).show()
             return
         }
         pendingCameraUri = uri
+
+        // εδώ χρησιμοποιείς ήδη ActivityResultContracts.TakePicture()
         takePicture.launch(uri)
     }
 
@@ -403,6 +497,97 @@ class PatientDetailActivity : AppCompatActivity() {
             )
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@PatientDetailActivity, "Προστέθηκε φωτογραφία", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun importAndSaveFromUri(src: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val dest = copyImageToAppAlbum(src)
+            if (dest == null) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@PatientDetailActivity, "Αποτυχία εισαγωγής εικόνας", Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+            PodologiaDatabase.getDatabase(this@PatientDetailActivity)
+                .patientPhotoDao()
+                .insert(
+                    com.kasal.podoapp.data.PatientPhoto(
+                        patientId = patientId,
+                        photoUri = dest.toString(),
+                        takenAtMillis = System.currentTimeMillis()
+                    )
+                )
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@PatientDetailActivity, "Η φωτογραφία προστέθηκε", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    /** Αντιγράφει το src URI σε MediaStore (Pictures/PodoApp) και επιστρέφει το νέο μόνιμο URI. */
+    private fun copyImageToAppAlbum(src: Uri): Uri? {
+        return try {
+            val now = System.currentTimeMillis()
+            val name = "podoapp_${patientId}_$now.jpg"
+            val values = ContentValues().apply {
+                put(MediaStore.Images.Media.DISPLAY_NAME, name)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Images.Media.DATE_TAKEN, now)
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/PodoApp")
+                put(MediaStore.Images.Media.IS_PENDING, 0)
+            }
+            val dest = contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
+            ) ?: return null
+
+            contentResolver.openInputStream(src)?.use { input ->
+                contentResolver.openOutputStream(dest)?.use { output ->
+                    input.copyTo(output)
+                } ?: return null
+            } ?: return null
+
+            dest
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun migrateOldPickerUrisIfAny() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = PodologiaDatabase.getDatabase(this@PatientDetailActivity)
+            val list = db.patientPhotoDao().getPhotosForPatient(patientId)
+            for (photo in list) {
+                val u = Uri.parse(photo.photoUri)
+                if (u.authority?.contains("photopicker") == true) {
+                    val dest = copyImageToAppAlbum(u)
+                    if (dest != null) {
+                        db.patientPhotoDao().updateUri(photo.id, dest.toString())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun confirmDeletePhoto(photo: PatientPhoto) {
+        AlertDialog.Builder(this)
+            .setTitle("Διαγραφή φωτογραφίας;")
+            .setMessage("Η φωτογραφία θα αφαιρεθεί από την καρτέλα. Να συνεχίσω;")
+            .setPositiveButton("Διαγραφή") { _, _ -> deletePhoto(photo) }
+            .setNegativeButton("Άκυρο", null)
+            .show()
+    }
+
+    private fun deletePhoto(photo: PatientPhoto) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            // 1) Διαγραφή από Room
+            PodologiaDatabase.getDatabase(this@PatientDetailActivity)
+                .patientPhotoDao()
+                .delete(photo.id)
+            // 2) Προσπάθεια διαγραφής και από MediaStore (προαιρετικό)
+            try { contentResolver.delete(Uri.parse(photo.photoUri), null, null) } catch (_: Exception) {}
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@PatientDetailActivity, "Διαγράφηκε", Toast.LENGTH_SHORT).show()
             }
         }
     }

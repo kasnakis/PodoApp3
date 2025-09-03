@@ -1,67 +1,53 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/logoImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/podologiko_logo_small"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="24dp" />
-
-    <TextView
-        android:id="@+id/welcomeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Καλωσήρθατε στο PodoApp"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="20dp" />
-
-    <Button
-        android:id="@+id/buttonAddPatient"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Νέος Πελάτης"
-        android:layout_marginTop="16dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <Button
-        android:id="@+id/buttonGo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Μετάβαση στο Πελατολόγιο" />
+        <!-- ΛΟΓΟΤΥΠΟ -->
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/podologiko_logo_small"
+            android:layout_marginBottom="16dp" />
 
-    <Button
-        android:id="@+id/buttonCalendar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ημερολόγιο Ραντεβού"
-        android:layout_marginTop="12dp" />
+        <!-- Πελάτες -->
+        <Button
+            android:id="@+id/btnAddPatient"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Νέος Πελάτης" />
 
-    <Button
-        android:id="@+id/buttonVisitCalendar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ημερολόγιο Επισκέψεων"
-        android:layout_marginTop="12dp" />
+        <Button
+            android:id="@+id/btnPatientList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Λίστα Πελατών"
+            android:layout_marginTop="8dp" />
 
-    <Button
-        android:id="@+id/buttonNewAppointment"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Νέο Ραντεβού"
-        android:layout_marginTop="16dp" />
+        <!-- Ραντεβού -->
+        <Button
+            android:id="@+id/btnNewAppointment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Νέο Ραντεβού"
+            android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/buttonAppointmentCalendar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ημερολόγιο Ραντεβού"
-        android:layout_marginTop="16dp" />
+        <Button
+            android:id="@+id/btnAppointmentCalendar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ημερολόγιο Ραντεβού"
+            android:layout_marginTop="8dp" />
 
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

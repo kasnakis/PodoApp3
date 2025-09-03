@@ -1,14 +1,11 @@
-package com.kasal.podoapp
+package com.kasal.podoapp.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.kasal.podoapp.ui.AddPatientActivity
-import com.kasal.podoapp.ui.PatientListActivity
-import com.kasal.podoapp.ui.AppointmentCalendarActivity
-import com.kasal.podoapp.ui.VisitCalendarActivity
-import com.kasal.podoapp.ui.NewAppointmentActivity
+import com.kasal.podoapp.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,30 +13,53 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val buttonAddPatient = findViewById<Button>(R.id.buttonAddPatient)
-        val buttonViewPatients = findViewById<Button>(R.id.buttonGo)
-        val buttonAppointmentCalendar = findViewById<Button>(R.id.buttonAppointmentCalendar)
-        val buttonVisitCalendar = findViewById<Button>(R.id.buttonVisitCalendar)
-        val buttonNewAppointment = findViewById<Button>(R.id.buttonNewAppointment)
+        // Μινιμαλιστική λίστα ενεργών ενεργειών (ταιριάζει με το καθαρό layout)
+        val actions: List<Pair<Int, List<String>>> = listOf(
+            R.id.btnAddPatient          to fqcn("AddPatientActivity"),
+            R.id.btnPatientList         to fqcn("PatientListActivity"),
+            R.id.btnNewAppointment      to fqcn("NewAppointmentActivity"),
+            R.id.btnAppointmentCalendar to fqcn("AppointmentCalendarActivity")
+        )
 
-        buttonAddPatient.setOnClickListener {
-            startActivity(Intent(this, AddPatientActivity::class.java))
+        actions.forEach { (viewId, candidates) ->
+            bindOrHide(viewId, candidates)
         }
+    }
 
-        buttonViewPatients.setOnClickListener {
-            startActivity(Intent(this, PatientListActivity::class.java))
-        }
+    /** Προτιμάμε ui.* και ως fallback root package. */
+    private fun fqcn(simple: String): List<String> = listOf(
+        "com.kasal.podoapp.ui.$simple",
+        "com.kasal.podoapp.$simple"
+    )
 
-        buttonAppointmentCalendar.setOnClickListener {
-            startActivity(Intent(this, AppointmentCalendarActivity::class.java))
+    /** Αν υπάρχει Activity, δένει onClick, αλλιώς GONE. */
+    private fun bindOrHide(viewId: Int, candidates: List<String>) {
+        val v = findViewById<View?>(viewId) ?: return
+        val clazz = resolveFirstExistingActivity(candidates) ?: run {
+            v.visibility = View.GONE
+            return
         }
+        val intent = Intent().setClassName(this, clazz.name)
+        val canResolve = packageManager.resolveActivity(intent, 0) != null
+        if (!canResolve) {
+            v.visibility = View.GONE
+            return
+        }
+        v.visibility = View.VISIBLE
+        v.setOnClickListener { startActivity(intent) }
+    }
 
-        buttonVisitCalendar.setOnClickListener {
-            startActivity(Intent(this, VisitCalendarActivity::class.java))
+    /** Βρες την πρώτη Activity κλάση που υπάρχει. */
+    private fun resolveFirstExistingActivity(candidates: List<String>): Class<out Activity>? {
+        for (name in candidates) {
+            try {
+                val c = Class.forName(name)
+                if (Activity::class.java.isAssignableFrom(c)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return c as Class<out Activity>
+                }
+            } catch (_: ClassNotFoundException) { /* try next */ }
         }
-
-        buttonNewAppointment.setOnClickListener {
-            startActivity(Intent(this, NewAppointmentActivity::class.java))
-        }
+        return null
     }
 }

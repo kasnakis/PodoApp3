@@ -13,7 +13,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class PatientPhotoAdapter(
-    private val onClick: (PatientPhoto) -> Unit
+    private val onClick: (PatientPhoto) -> Unit,
+    private val onLongClick: ((PatientPhoto) -> Unit)? = null // Νέο: Προσθήκη listener για long-press
 ) : ListAdapter<PatientPhoto, PatientPhotoAdapter.VH>(DIFF) {
 
     companion object {
@@ -35,8 +36,18 @@ class PatientPhotoAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val item = getItem(position)
-        holder.img.setImageURI(Uri.parse(item.photoUri))
+        try {
+            holder.img.setImageURI(Uri.parse(item.photoUri))
+        } catch (_: SecurityException) {
+            holder.img.setImageResource(android.R.drawable.ic_menu_report_image) // fallback icon
+        }
         holder.tv.text = DATE_FMT.format(Date(item.takenAtMillis))
         holder.itemView.setOnClickListener { onClick(item) }
+
+        // Νέο: Προσθήκη του onLongClickListener
+        holder.itemView.setOnLongClickListener {
+            onLongClick?.invoke(item)
+            true // Επιστρέφουμε true για να υποδείξουμε ότι το event καταναλώθηκε
+        }
     }
 }

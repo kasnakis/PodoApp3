@@ -40,8 +40,6 @@
                 android:text="Νέο Ραντεβού" />
         </LinearLayout>
 
-        <include layout="@layout/include_patient_photos" />
-
         <TextView
             android:id="@+id/textPatientNameHeader"
             android:layout_width="match_parent"
@@ -233,6 +231,8 @@
             android:id="@+id/spinnerOrthoticType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+
+        <include layout="@layout/include_patient_photos" />
 
         <Button
             android:id="@+id/btnSaveHistory"

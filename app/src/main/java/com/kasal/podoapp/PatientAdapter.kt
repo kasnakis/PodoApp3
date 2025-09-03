@@ -40,6 +40,12 @@ class PatientAdapter(
             intent.putExtra("patientId", patient.id)   // <-- περνάμε μόνο το id
             context.startActivity(intent)
         }
+
+        // Προσθήκη onLongClickListener για εμφάνιση διαλόγου επεξεργασίας/διαγραφής
+        holder.itemView.setOnLongClickListener {
+            showEditDialog(position)
+            true
+        }
     }
 
     override fun getItemCount(): Int = patients.size

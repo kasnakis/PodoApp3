@@ -17,4 +17,8 @@ interface PatientPhotoDao {
 
     @Query("DELETE FROM PatientPhoto WHERE id = :photoId")
     suspend fun delete(photoId: Int)
+
+    // ΝΕΟ: για μετανάστευση picker URIs σε μόνιμα
+    @Query("UPDATE PatientPhoto SET photoUri = :newUri WHERE id = :id")
+    suspend fun updateUri(id: Int, newUri: String)
 }
