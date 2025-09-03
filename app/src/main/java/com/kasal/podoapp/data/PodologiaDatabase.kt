@@ -17,10 +17,13 @@ import androidx.room.RoomDatabase
     exportSchema = true
 )
 abstract class PodologiaDatabase : RoomDatabase() {
+
     abstract fun patientDao(): PatientDao
     abstract fun visitDao(): VisitDao
     abstract fun appointmentDao(): AppointmentDao
     abstract fun patientPhotoDao(): PatientPhotoDao
+    // ✅ ΠΡΟΣΘΗΚΗ
+    abstract fun patientHistoryDao(): PatientHistoryDao
 
     companion object {
         @Volatile private var INSTANCE: PodologiaDatabase? = null
@@ -38,6 +41,7 @@ abstract class PodologiaDatabase : RoomDatabase() {
                 PodologiaDatabase::class.java,
                 "podologia.db"
             )
+                // Dev mode: σε production βάλε proper migrations αντί για destructive
                 .fallbackToDestructiveMigration()
                 .build()
     }
