@@ -1,5 +1,6 @@
 package com.kasal.podoapp.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -11,11 +12,15 @@ import com.kasal.podoapp.data.PodologiaDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
 
 class PatientDetailActivity : AppCompatActivity() {
 
     private var patientId: Int = 0
     private var existing: PatientHistory? = null
+
+    // Header name
+    private lateinit var textPatientNameHeader: TextView
 
     // Views
     private lateinit var etDoctorName: EditText
@@ -38,7 +43,7 @@ class PatientDetailActivity : AppCompatActivity() {
     private lateinit var cbPronation: CheckBox
     private lateinit var cbSupination: CheckBox
 
-    // Vascular (Right) – τα υπόλοιπα tabs τα χειριζόμαστε στα αντίστοιχα fragments
+    // Vascular (Right)
     private lateinit var cbEdemaRight: CheckBox
     private lateinit var cbVaricoseDorsalRight: CheckBox
     private lateinit var cbVaricosePlantarRight: CheckBox
@@ -48,6 +53,10 @@ class PatientDetailActivity : AppCompatActivity() {
 
     private lateinit var btnSave: Button
 
+    private lateinit var btnVisitHistory: Button
+    private lateinit var btnPatientAppointments: Button
+    private lateinit var btnNewAppointment: Button
+
     private val orthoticTypes = arrayOf("NONE", "STOCK", "CUSTOM")
     private val diabeticTypes = arrayOf("", "TYPE_1", "TYPE_2")
 
@@ -55,14 +64,49 @@ class PatientDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_patient_detail)
 
-        // ΝΕΟ (safe):
-        patientId = intent.getIntExtra("patientId", -1)
+        // Διαβάζουμε patientId με ασφαλές fallback από serialized Patient
+        val extraId = intent.getIntExtra("patientId", 0)
+        patientId = if (extraId > 0) {
+            extraId
+        } else {
+            val p = intent.getSerializableExtra("patient") as? Patient
+            p?.id ?: 0
+        }
         if (patientId <= 0) {
             Toast.makeText(this, "Άκυρο patientId", Toast.LENGTH_LONG).show()
-            finish(); return
+            finish()
+            return
         }
 
+        // Bind βασικών views (συμπεριλαμβανομένου του header ονόματος)
         bindViews()
+
+        // Θέτουμε τίτλο & header name
+        setPatientNameInTitleAndHeader(patientId)
+
+        // Κουμπιά ενεργειών
+        btnVisitHistory = findViewById(R.id.btnVisitHistory)
+        btnPatientAppointments = findViewById(R.id.btnPatientAppointments)
+        btnNewAppointment = findViewById(R.id.btnNewAppointment)
+
+        btnVisitHistory.setOnClickListener {
+            val i = Intent(this, VisitListActivity::class.java)
+            i.putExtra("patientId", patientId)
+            startActivity(i)
+        }
+
+        btnPatientAppointments.setOnClickListener {
+            val i = Intent(this, AppointmentActivity::class.java)
+            i.putExtra("patientId", patientId)
+            startActivity(i)
+        }
+
+        btnNewAppointment.setOnClickListener {
+            val i = Intent(this, NewAppointmentActivity::class.java)
+            i.putExtra("patientId", patientId)
+            startActivity(i)
+        }
+
         setupSpinners()
 
         val db = PodologiaDatabase.getDatabase(this)
@@ -103,7 +147,29 @@ class PatientDetailActivity : AppCompatActivity() {
         error("Δεν βρέθηκε κανένα από τα ids: ${names.joinToString()}")
     }
 
+    private fun setPatientNameInTitleAndHeader(id: Int) {
+        val db = PodologiaDatabase.getDatabase(this)
+        // Φέρε από Room σε background thread
+        CoroutineScope(Dispatchers.IO).launch {
+            val patient = db.patientDao().getPatientById(id)
+            withContext(Dispatchers.Main) {
+                if (patient != null) {
+                    val full = patient.fullName
+                    supportActionBar?.title = full
+                    supportActionBar?.subtitle = "ID #${patient.id}"
+                    textPatientNameHeader.text = full
+                } else {
+                    val fallback = "Πελάτης #$id"
+                    supportActionBar?.title = fallback
+                    textPatientNameHeader.text = fallback
+                }
+            }
+        }
+    }
+
     private fun bindViews() {
+        textPatientNameHeader = findViewById(R.id.textPatientNameHeader)
+
         etDoctorName = findViewById(R.id.etDoctorName)
         etDoctorPhone = findViewById(R.id.etDoctorPhone)
         etDiagnosis = findViewById(R.id.etDiagnosis)
@@ -150,7 +216,10 @@ class PatientDetailActivity : AppCompatActivity() {
         etAllergies.setText(h.allergies ?: "")
 
         switchDiabetic.isChecked = h.isDiabetic
-        spinnerDiabeticType.setSelection(diabeticTypes.indexOf(h.diabeticType ?: ""))
+
+        val diabIndex = diabeticTypes.indexOf(h.diabeticType ?: "")
+        spinnerDiabeticType.setSelection(if (diabIndex >= 0) diabIndex else 0)
+
         etInsulinNotes.setText(h.insulinNotes ?: "")
         etPillsNotes.setText(h.pillsNotes ?: "")
 
@@ -169,7 +238,9 @@ class PatientDetailActivity : AppCompatActivity() {
         cbVaricosePlantarRight.isChecked = h.varicosePlantarRight
 
         etSplintNotes.setText(h.splintNotes ?: "")
-        spinnerOrthoticType.setSelection(orthoticTypes.indexOf(h.orthoticType ?: "NONE"))
+
+        val orthoIndex = orthoticTypes.indexOf(h.orthoticType ?: "NONE")
+        spinnerOrthoticType.setSelection(if (orthoIndex >= 0) orthoIndex else 0)
     }
 
     private fun collectForm(existingId: Int?): PatientHistory {
@@ -197,8 +268,8 @@ class PatientDetailActivity : AppCompatActivity() {
             pronation = cbPronation.isChecked,
             supination = cbSupination.isChecked,
 
-            // προς το παρόν μόνο τα right-vascular από αυτό το Activity
-            edemaLeft = existing?.edemaLeft ?: false, // δεν υπάρχει control εδώ
+            // Προς το παρόν μόνο τα Right vascular από αυτό το Activity
+            edemaLeft = existing?.edemaLeft ?: false,
             edemaRight = cbEdemaRight.isChecked,
             varicoseDorsalLeft = existing?.varicoseDorsalLeft ?: false,
             varicoseDorsalRight = cbVaricoseDorsalRight.isChecked,
