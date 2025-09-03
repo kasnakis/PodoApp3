@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,7 +35,11 @@ class VisitCalendarActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewDayVisits)
         buttonPickDate = findViewById(R.id.buttonPickDate)
 
-        adapter = VisitForDayAdapter { visit -> openVisitDetail(visit) }
+        adapter = VisitForDayAdapter(
+            onVisitClick = { visit -> openVisitDetail(visit) },
+            onEditClick = { visit -> openVisitDetail(visit) },
+            onDeleteClick = { visit -> confirmDelete(visit) }
+        )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
@@ -62,6 +67,25 @@ class VisitCalendarActivity : AppCompatActivity() {
         startActivity(i)
     }
 
+    private fun confirmDelete(visit: Visit) {
+        AlertDialog.Builder(this)
+            .setTitle("Διαγραφή Επίσκεψης")
+            .setMessage("Να διαγραφεί οριστικά η επίσκεψη #${visit.id};")
+            .setPositiveButton("Διαγραφή") { _, _ -> deleteVisit(visit) }
+            .setNegativeButton("Ακύρωση", null)
+            .show()
+    }
+
+    private fun deleteVisit(visit: Visit) {
+        scope.launch(Dispatchers.IO) {
+            val db = PodologiaDatabase.getDatabase(this@VisitCalendarActivity)
+            db.visitDao().delete(visit)
+            withContext(Dispatchers.Main) {
+                loadVisitsForDay(selectedDayUtcMillis)
+            }
+        }
+    }
+
     private fun loadVisitsForDay(dayUtcStart: Long) {
         val (start, end) = dayBoundsUtc(dayUtcStart)
         val db = PodologiaDatabase.getDatabase(this)
@@ -69,7 +93,7 @@ class VisitCalendarActivity : AppCompatActivity() {
         scope.launch(Dispatchers.IO) {
             val visits = db.visitDao().getVisitsForDate(start, end)
             withContext(Dispatchers.Main) {
-                adapter.submitList(visits)   // ✅ σιγουρεύουμε ότι υπάρχει αυτή η μέθοδος στον adapter
+                adapter.submitList(visits)
             }
         }
     }

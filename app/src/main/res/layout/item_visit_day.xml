@@ -13,22 +13,37 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Λόγος -->
-        <TextView
-            android:id="@+id/textVisitReason"
+        <!-- Επάνω σειρά: Overflow δεξιά -->
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Λόγος: -"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:paddingBottom="4dp" />
+            android:layout_height="wrap_content">
 
-        <!-- Διάγνωση -->
+            <TextView
+                android:id="@+id/textVisitReason"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Θεραπεία: -"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:paddingBottom="4dp" />
+
+            <ImageButton
+                android:id="@+id/buttonOverflow"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/more_actions"
+                android:src="@drawable/ic_more_vert_24" />
+        </LinearLayout>
+
+        <!-- Διάγνωση (χρέωση εδώ) -->
         <TextView
             android:id="@+id/textVisitDiagnosis"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Διάγνωση: -"
+            android:text="Χρέωση: -"
             android:paddingBottom="4dp" />
 
         <!-- Σημειώσεις -->
@@ -36,15 +51,7 @@
             android:id="@+id/textVisitNotes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Σημειώσεις: -"
-            android:paddingBottom="8dp" />
-
-        <!-- Φωτογραφίες επίσκεψης (οριζόντιο RecyclerView) -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewVisitPhotos"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:visibility="gone" />
+            android:text="Σημειώσεις: -" />
 
     </LinearLayout>
 
