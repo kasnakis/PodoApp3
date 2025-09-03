@@ -15,6 +15,7 @@ import com.kasal.podoapp.data.PodologiaDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.collectLatest // Προσθήκη του import
 
 class PatientHistoryTabsActivity : AppCompatActivity() {
 
@@ -65,11 +66,13 @@ class PatientHistoryTabsActivity : AppCompatActivity() {
         // Prefill αν υπάρχει ήδη ιστορικό
         lifecycleScope.launch {
             val db = PodologiaDatabase.getDatabase(this@PatientHistoryTabsActivity)
-            val history = withContext(Dispatchers.IO) {
-                db.patientHistoryDao().getByPatientId(patientId)
-            }
-            existingHistory = history
-            pagerAdapter.prefillAll(existingHistory)
+            // Αλλαγή: χρήση του collectLatest με ρητό τύπο
+            db.patientHistoryDao()
+                .observeByPatientId(patientId)
+                .collectLatest { history: PatientHistory? ->
+                    existingHistory = history
+                    pagerAdapter.prefillAll(existingHistory)
+                }
         }
 
         // Αποθήκευση όλων των tabs

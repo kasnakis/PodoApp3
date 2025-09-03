@@ -26,17 +26,15 @@ android {
 
     buildFeatures { viewBinding true }
 
-    // ✅ Java 17
+    // Java 17
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    // ✅ Kotlin 17
+    // Kotlin 17
     kotlinOptions {
         jvmTarget = '17'
-        // (προαιρετικό) αν θες να «σιγάσουν» warnings kapt:
-        // languageVersion = '1.9'
     }
 }
 
@@ -62,7 +60,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
 
-    // Images
+    // Images (αν το χρειάζεσαι)
     implementation 'com.squareup.picasso:picasso:2.8'
 
     // Tests
@@ -73,5 +71,11 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
-    arguments { arg("room.incremental", "true") }
+    arguments {
+        // ✅ κρατάμε export schema χωρίς plugin
+        arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
+        // προαιρετικό:
+        // arg("room.expandProjection", "true")
+    }
 }

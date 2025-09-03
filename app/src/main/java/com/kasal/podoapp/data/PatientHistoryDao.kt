@@ -9,10 +9,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PatientHistoryDao {
 
-    @Query("SELECT * FROM PatientHistory WHERE patientId = :patientId LIMIT 1")
+    // Προσοχή στο tableName: "patient_history"
+    @Query("SELECT * FROM patient_history WHERE patientId = :patientId LIMIT 1")
     fun observeByPatientId(patientId: Int): Flow<PatientHistory?>
 
-    @Query("SELECT * FROM PatientHistory WHERE patientId = :patientId LIMIT 1")
+    @Query("SELECT * FROM patient_history WHERE patientId = :patientId LIMIT 1")
     suspend fun getByPatientId(patientId: Int): PatientHistory?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
