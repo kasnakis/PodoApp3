@@ -1,11 +1,9 @@
 package com.kasal.podoapp.ui
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.widget.*
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,8 +11,12 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.Appointment
 import com.kasal.podoapp.data.PodologiaDatabase
-import com.kasal.podoapp.data.Visit
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -22,20 +24,13 @@ class AppointmentCalendarActivity : AppCompatActivity() {
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    private lateinit var adapter: AppointmentAdapter
+    private lateinit var adapter: AppointmentForDayAdapter
     private lateinit var textSelectedDate: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var buttonPickDate: Button
-    private lateinit var editSearch: EditText
-    private lateinit var spinnerSort: Spinner
 
-    // Κρατάμε ΤΟΠΙΚΟ start-of-day (όχι UTC)
-    private var selectedDayLocalStartMillis: Long = localTodayStartMillis()
-
-    private var currentAppointments: List<Appointment> = emptyList()
-    private var filteredAppointments: List<Appointment> = emptyList()
-
-    private val fmtDisplay = SimpleDateFormat("EEEE dd/MM/yyyy", Locale("el"))
+    // Κρατάμε την επιλεγμένη μέρα σε UTC 00:00 (millis)
+    private var selectedDayUtcMillis: Long = todayUtcStartMillis()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,127 +39,64 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         textSelectedDate = findViewById(R.id.textSelectedDate)
         recyclerView = findViewById(R.id.recyclerViewDayAppointments)
         buttonPickDate = findViewById(R.id.buttonPickDate)
-        editSearch = findViewById(R.id.editSearchAppt)
-        spinnerSort = findViewById(R.id.spinnerSortAppt)
 
-        adapter = AppointmentAdapter(
-            onCompleted = { appt -> convertToVisit(appt) },
-            onEdit = { appt -> openEdit(appt) },
-            onDelete = { appt -> confirmDelete(appt) }
+        adapter = AppointmentForDayAdapter(
+            onItemClick = { appt -> openEditAppointment(appt) },
+            onItemLongClick = { appt -> openPatientProfile(appt.patientId) }
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        spinnerSort.adapter = ArrayAdapter(
-            this, android.R.layout.simple_spinner_dropdown_item,
-            listOf("Ώρα ↑", "Ώρα ↓", "Κατάσταση A-Z", "Κατάσταση Z-A")
-        )
-
-        textSelectedDate.text = fmtDisplay.format(Date(selectedDayLocalStartMillis))
-        loadAppointmentsForDay(selectedDayLocalStartMillis)
+        textSelectedDate.text = formatDateForDisplay(selectedDayUtcMillis)
+        loadAppointmentsForDay(selectedDayUtcMillis)
 
         buttonPickDate.setOnClickListener {
             val picker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Επιλογή Ημερομηνίας")
-                // Δείχνουμε την τρέχουσα τοπική μέρα ως επιλογή (μετατρέπουμε σε UTC ms τοπικής ημέρας)
-                .setSelection(localStartToUtc(selectedDayLocalStartMillis))
+                .setSelection(selectedDayUtcMillis)
                 .build()
 
             picker.show(supportFragmentManager, "date_picker")
             picker.addOnPositiveButtonClickListener { selectionUtc ->
-                // Το MaterialDatePicker δίνει UTC 00:00. Μετατρέπουμε σε ΤΟΠΙΚΟ 00:00 της ίδιας ημερομηνίας.
-                selectedDayLocalStartMillis = utcMidnightToLocalStart(selectionUtc)
-                textSelectedDate.text = fmtDisplay.format(Date(selectedDayLocalStartMillis))
-                loadAppointmentsForDay(selectedDayLocalStartMillis)
+                selectedDayUtcMillis = startOfUtcDay(selectionUtc)
+                textSelectedDate.text = formatDateForDisplay(selectedDayUtcMillis)
+                loadAppointmentsForDay(selectedDayUtcMillis)
             }
-        }
-
-        editSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) { applyFilters() }
-        })
-        spinnerSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: android.view.View?, pos: Int, id: Long) { applyFilters() }
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
     }
 
-    private fun convertToVisit(appt: Appointment) {
+    private fun openEditAppointment(appt: Appointment) {
+        // ✅ Περνάμε ΜΟΝΟ το ID για να μη χρειάζεται Serializable/Parcelable
+        val intent = Intent(this, EditAppointmentActivity::class.java)
+        intent.putExtra("appointmentId", appt.id)
+        startActivity(intent)
+    }
+
+    private fun openPatientProfile(patientId: Int) {
+        val i = Intent(this, PatientDetailActivity::class.java)
+        i.putExtra("patientId", patientId)
+        startActivity(i)
+    }
+
+    private fun loadAppointmentsForDay(dayUtcStart: Long) {
+        val (start, end) = dayBoundsUtc(dayUtcStart)
+        val db = PodologiaDatabase.getDatabase(this)
+
         scope.launch(Dispatchers.IO) {
-            val db = PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity)
-            db.appointmentDao().updateStatus(appt.id, "COMPLETED")
-            val newId = db.visitDao().insert(
-                Visit(
-                    patientId = appt.patientId,
-                    appointmentId = appt.id,
-                    dateTime = System.currentTimeMillis(),
-                    notes = appt.notes,
-                    charge = appt.charge,
-                    treatment = appt.treatment
-                )
-            )
+            val appointments = db.appointmentDao().getAppointmentsForDate(start, end)
+
+            // Συμπλήρωσε με ονοματεπώνυμο (fullName) για εμφάνιση
+            val patientDao = db.patientDao()
+            val items: List<Pair<Appointment, String>> = appointments.map { a ->
+                val p = patientDao.getPatientById(a.patientId)
+                val name = p?.fullName ?: "Πελάτης #${a.patientId}"
+                a to name
+            }
+
             withContext(Dispatchers.Main) {
-                Toast.makeText(this@AppointmentCalendarActivity, "Δημιουργήθηκε επίσκεψη", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this@AppointmentCalendarActivity, VisitDetailActivity::class.java)
-                    .putExtra("visitId", newId.toInt()))
-                loadAppointmentsForDay(selectedDayLocalStartMillis)
+                adapter.submitList(items)
             }
         }
-    }
-
-    private fun openEdit(appt: Appointment) {
-        startActivity(Intent(this, EditAppointmentActivity::class.java).putExtra("appointmentId", appt.id))
-    }
-
-    private fun confirmDelete(appt: Appointment) {
-        AlertDialog.Builder(this)
-            .setTitle("Διαγραφή ραντεβού")
-            .setMessage("Σίγουρα θέλεις να διαγράψεις αυτό το ραντεβού;")
-            .setPositiveButton("Ναι") { _, _ -> deleteAppointment(appt) }
-            .setNegativeButton("Όχι", null)
-            .show()
-    }
-
-    private fun deleteAppointment(appt: Appointment) {
-        scope.launch(Dispatchers.IO) {
-            PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity).appointmentDao().delete(appt)
-            withContext(Dispatchers.Main) { loadAppointmentsForDay(selectedDayLocalStartMillis) }
-        }
-    }
-
-    private fun loadAppointmentsForDay(dayLocalStart: Long) {
-        val (start, end) = localDayBounds(dayLocalStart)
-        scope.launch(Dispatchers.IO) {
-            val list = PodologiaDatabase.getDatabase(this@AppointmentCalendarActivity)
-                .appointmentDao().getAppointmentsForDate(start, end)
-            withContext(Dispatchers.Main) {
-                currentAppointments = list
-                applyFilters()
-            }
-        }
-    }
-
-    private fun applyFilters() {
-        val q = editSearch.text?.toString()?.trim()?.lowercase(Locale.getDefault()) ?: ""
-        var list = currentAppointments
-        if (q.isNotEmpty()) {
-            list = list.filter { a ->
-                val s = a.status.lowercase(Locale.getDefault())
-                val t = a.treatment?.lowercase(Locale.getDefault()) ?: ""
-                val n = a.notes?.lowercase(Locale.getDefault()) ?: ""
-                val c = a.charge?.lowercase(Locale.getDefault()) ?: ""
-                s.contains(q) || t.contains(q) || n.contains(q) || c.contains(q)
-            }
-        }
-        when (spinnerSort.selectedItemPosition) {
-            0 -> list = list.sortedBy { it.dateTime }
-            1 -> list = list.sortedByDescending { it.dateTime }
-            2 -> list = list.sortedBy { it.status }
-            3 -> list = list.sortedByDescending { it.status }
-        }
-        filteredAppointments = list
-        adapter.submit(filteredAppointments)
     }
 
     override fun onDestroy() {
@@ -172,11 +104,9 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         scope.cancel()
     }
 
-    // ================= Helpers (ΤΟΠΙΚΗ ΖΩΝΗ) =================
-
-    /** Τοπικό 00:00 σήμερα */
-    private fun localTodayStartMillis(): Long {
-        val cal = Calendar.getInstance()
+    /** UTC 00:00 για σήμερα */
+    private fun todayUtcStartMillis(): Long {
+        val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
@@ -184,34 +114,27 @@ class AppointmentCalendarActivity : AppCompatActivity() {
         return cal.timeInMillis
     }
 
-    /** [start, endInclusive] για τοπική μέρα */
-    private fun localDayBounds(localStart: Long): Pair<Long, Long> {
-        val start = localStart
-        val end = localStart + 24L * 60L * 60L * 1000L - 1L
+    /** [startOfDayUtc, endOfDayUtcInclusive] για ένα UTC start-of-day */
+    private fun dayBoundsUtc(dayStartUtc: Long): Pair<Long, Long> {
+        val start = dayStartUtc
+        val end = dayStartUtc + (24L * 60L * 60L * 1000L) - 1L
         return start to end
     }
 
-    /** Μετατροπή: UTC 00:00 από το date-picker -> ΤΟΠΙΚΟ 00:00 της ίδιας ημερομηνίας */
-    private fun utcMidnightToLocalStart(utcMidnight: Long): Long {
-        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = utcMidnight }
-        val y = utc.get(Calendar.YEAR)
-        val m = utc.get(Calendar.MONTH)
-        val d = utc.get(Calendar.DAY_OF_MONTH)
-        val local = Calendar.getInstance()
-        local.set(y, m, d, 0, 0, 0)
-        local.set(Calendar.MILLISECOND, 0)
-        return local.timeInMillis
+    /** Γυρνά οποιοδήποτε UTC millis στο UTC 00:00 της ημέρας του */
+    private fun startOfUtcDay(anyUtcMillis: Long): Long {
+        val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = anyUtcMillis }
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
     }
 
-    /** Τοπικό start-of-day -> UTC milllis (για να δείξουμε σωστά default στο date-picker) */
-    private fun localStartToUtc(localStart: Long): Long {
-        val cal = Calendar.getInstance().apply { timeInMillis = localStart }
-        val y = cal.get(Calendar.YEAR)
-        val m = cal.get(Calendar.MONTH)
-        val d = cal.get(Calendar.DAY_OF_MONTH)
-        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        utc.set(y, m, d, 0, 0, 0)
-        utc.set(Calendar.MILLISECOND, 0)
-        return utc.timeInMillis
+    /** Μορφοποίηση για εμφάνιση (ελληνικά) */
+    private fun formatDateForDisplay(dayStartUtc: Long): String {
+        val local = Date(dayStartUtc)
+        val fmt = SimpleDateFormat("EEEE dd/MM/yyyy", Locale("el"))
+        return fmt.format(local)
     }
 }

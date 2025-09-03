@@ -33,6 +33,7 @@ interface VisitDao {
     """)
     suspend fun getVisitsForDate(start: Long, end: Long): List<Visit>
 
+    // ▶️ ΝΕΟ: Για VisitDetailActivity
     @Query("SELECT * FROM visits WHERE id = :id LIMIT 1")
     suspend fun getById(id: Int): Visit?
 }
