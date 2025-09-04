@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.kasal.podoapp.ui.widgets.ZoomableImageView
-        android:id="@+id/photoView"
+    <ImageView
+        android:id="@+id/photo_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#000"
@@ -28,7 +28,7 @@
             android:contentDescription="Πίσω" />
 
         <TextView
-            android:id="@+id/tvInfo"
+            android:id="@+id/tvTimestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
