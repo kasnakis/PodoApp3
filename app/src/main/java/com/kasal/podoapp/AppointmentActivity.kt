@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.collectLatest
 import java.util.*
 import android.content.Intent
 
-
 class AppointmentActivity : AppCompatActivity() {
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -38,7 +37,11 @@ class AppointmentActivity : AppCompatActivity() {
         setContentView(R.layout.activity_appointments)
 
         patientId = intent.getIntExtra("patientId", 0)
-        if (patientId == 0) { Toast.makeText(this, "Δεν βρέθηκε πελάτης", Toast.LENGTH_SHORT).show(); finish(); return }
+        if (patientId == 0) {
+            Toast.makeText(this, "Δεν βρέθηκε πελάτης", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
         db = PodologiaDatabase.getDatabase(this)
 
@@ -53,9 +56,12 @@ class AppointmentActivity : AppCompatActivity() {
         recycler.layoutManager = LinearLayoutManager(this)
         adapter = AppointmentAdapter(
             onEdit = { appt ->
-                // (προσωρινά) μπορείς να ανοίξεις EditActivity όταν ευθυγραμμιστεί το entity,
-                // προς το παρόν απλό feedback:
-                Toast.makeText(this, "Edit σύντομα διαθέσιμο", Toast.LENGTH_SHORT).show()
+                // **** ΕΔΩ ΕΙΝΑΙ Η ΔΙΟΡΘΩΣΗ ****
+                val intent = Intent(this, EditAppointmentActivity::class.java).apply {
+                    putExtra("appointmentId", appt.id)
+                    putExtra("patientId", patientId)
+                }
+                startActivity(intent)
             },
             onDelete = { appt ->
                 scope.launch(Dispatchers.IO) { db.appointmentDao().deleteById(appt.id) }
