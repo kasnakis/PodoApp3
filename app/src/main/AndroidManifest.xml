@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Περμίσια -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
@@ -9,20 +9,18 @@
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PodoApp"
-        tools:targetApi="31">
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
+        <!-- Η πραγματική αρχική Activity -->
         <activity
             android:name=".ui.MainActivity"
-            android:exported="true"
-            android:label="@string/app_name" />
+            android:exported="true" />
 
+        <!-- ΜΟΝΟ αυτό είναι LAUNCHER (alias προς το νέο path) -->
         <activity-alias
             android:name=".MainActivity"
             android:exported="true"
@@ -33,23 +31,18 @@
             </intent-filter>
         </activity-alias>
 
-        <activity android:name=".ui.AddPatientActivity" />
-        <activity android:name=".ui.PatientListActivity" />
-        <activity android:name=".ui.PatientDetailActivity" />
-
-        <activity android:name=".ui.NewAppointmentActivity" />
-        <activity android:name=".ui.EditAppointmentActivity" />
-        <activity android:name=".ui.AppointmentActivity" />
-        <activity android:name=".ui.AppointmentCalendarActivity" />
-
-        <activity android:name=".ui.NewVisitActivity" />
-        <activity android:name=".ui.VisitListActivity" />
-        <activity android:name=".ui.VisitCalendarActivity" />
-
-        <activity android:name=".ui.VisitDetailActivity" />
-        <activity android:name=".ui.FullscreenPhotoActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <!-- Υπόλοιπες Activities (ΧΩΡΙΣ intent-filters, exported=false) -->
+        <activity android:name=".ui.AddPatientActivity" android:exported="false" />
+        <activity android:name=".ui.PatientListActivity" android:exported="false" />
+        <activity android:name=".ui.PatientDetailActivity" android:exported="false" />
+        <activity android:name=".ui.NewAppointmentActivity" android:exported="false" />
+        <activity android:name=".ui.AppointmentActivity" android:exported="false" />
+        <activity android:name=".ui.AppointmentCalendarActivity" android:exported="false" />
+        <activity android:name=".ui.EditAppointmentActivity" android:exported="false" />
+        <activity android:name=".ui.NewVisitActivity" android:exported="false" />
+        <activity android:name=".ui.VisitListActivity" android:exported="false" />
+        <activity android:name=".ui.VisitCalendarActivity" android:exported="false" />
+        <activity android:name=".ui.FullscreenPhotoActivity" android:exported="false" />
 
     </application>
 </manifest>

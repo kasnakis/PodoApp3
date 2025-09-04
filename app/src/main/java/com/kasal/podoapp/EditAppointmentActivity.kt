@@ -1,161 +1,166 @@
 package com.kasal.podoapp.ui
 
-import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.Appointment
 import com.kasal.podoapp.data.PodologiaDatabase
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
 class EditAppointmentActivity : AppCompatActivity() {
 
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var appointmentId: Int = 0
+    private var patientId: Int = 0
 
-    private lateinit var textWhen: TextView
-    private lateinit var buttonPickDate: Button
-    private lateinit var buttonPickTime: Button
-    private lateinit var spinnerStatus: Spinner
-    private lateinit var editTreatment: EditText
-    private lateinit var editCharge: EditText
-    private lateinit var editNotes: EditText
-    private lateinit var buttonSave: Button
-    private lateinit var buttonDelete: Button
+    // Views
+    private lateinit var tvPatientHeader: TextView
+    private lateinit var btnPickDate: Button
+    private lateinit var btnPickTime: Button
+    private lateinit var etDuration: EditText
+    private lateinit var etNotes: EditText
+    private lateinit var btnSave: Button
+    private lateinit var btnDelete: Button
 
-    private var appointment: Appointment? = null
-    private var selectedDateTime: Long = System.currentTimeMillis()
+    private val cal = Calendar.getInstance()
+    private val dateFmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    private val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-    private val statuses = listOf("PENDING", "CONFIRMED", "COMPLETED", "CANCELLED")
-    private val fmtFull = SimpleDateFormat("EEEE dd/MM/yyyy, HH:mm", Locale("el"))
+    private var existing: Appointment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_appointment)
 
-        textWhen = findViewById(R.id.textApptWhen)
-        buttonPickDate = findViewById(R.id.buttonPickDate)
-        buttonPickTime = findViewById(R.id.buttonPickTime)
-        spinnerStatus = findViewById(R.id.spinnerStatus)
-        editTreatment = findViewById(R.id.editTreatment)
-        editCharge = findViewById(R.id.editCharge)
-        editNotes = findViewById(R.id.editNotes)
-        buttonSave = findViewById(R.id.buttonSaveAppointment)
-        buttonDelete = findViewById(R.id.buttonDeleteAppointment)
-
-        spinnerStatus.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, statuses)
-
-        val apptId = intent.getIntExtra("appointmentId", -1)
-        if (apptId <= 0) {
-            Toast.makeText(this, "Άκυρο appointmentId", Toast.LENGTH_LONG).show()
-            finish(); return
+        appointmentId = intent.getIntExtra("appointmentId", 0)
+        patientId = intent.getIntExtra("patientId", 0)
+        if (appointmentId <= 0) {
+            Toast.makeText(this, "Άκυρο ραντεβού", Toast.LENGTH_LONG).show()
+            finish()
+            return
         }
 
-        val db = PodologiaDatabase.getDatabase(this)
-        scope.launch(Dispatchers.IO) {
-            appointment = db.appointmentDao().getById(apptId)
+        bindViews()
+        wirePickers()
+        title = "Επεξεργασία Ραντεβού"
+
+        val db = PodologiaDatabase.getInstance(this)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            existing = db.appointmentDao().getById(appointmentId)
+            val patient = if (patientId > 0) db.patientDao().getPatientById(patientId) else null
+
             withContext(Dispatchers.Main) {
-                if (appointment == null) {
-                    Toast.makeText(this@EditAppointmentActivity, "Δεν βρέθηκε ραντεβού", Toast.LENGTH_LONG).show()
+                tvPatientHeader.text = patient?.fullName ?: "Πελάτης #$patientId"
+                existing?.let { populate(it) } ?: run {
+                    Toast.makeText(this@EditAppointmentActivity, "Το ραντεβού δεν βρέθηκε", Toast.LENGTH_LONG).show()
                     finish()
-                } else {
-                    bindUi(appointment!!)
                 }
             }
         }
 
-        buttonPickDate.setOnClickListener { showDatePicker() }
-        buttonPickTime.setOnClickListener { showTimePicker() }
-        buttonSave.setOnClickListener { saveChanges() }
-        buttonDelete.setOnClickListener { confirmDelete() }
+        btnSave.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                val updated = collect() ?: return@launch
+                db.appointmentDao().upsert(updated)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@EditAppointmentActivity, "Αποθηκεύτηκε", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
+
+        btnDelete.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                existing?.let { db.appointmentDao().deleteById(it.id) }
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@EditAppointmentActivity, "Διαγράφηκε", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
     }
 
-    private fun bindUi(a: Appointment) {
-        selectedDateTime = a.dateTime
-        textWhen.text = fmtFull.format(Date(selectedDateTime))
-        editTreatment.setText(a.treatment ?: "")
-        editCharge.setText(a.charge ?: "")
-        editNotes.setText(a.notes ?: "")
-
-        val idx = statuses.indexOf(a.status).takeIf { it >= 0 } ?: 0
-        spinnerStatus.setSelection(idx)
+    private fun bindViews() {
+        tvPatientHeader = findViewById(R.id.tvPatientHeader)
+        btnPickDate = findViewById(R.id.btnPickDate)
+        btnPickTime = findViewById(R.id.btnPickTime)
+        etDuration = findViewById(R.id.etDuration)
+        etNotes = findViewById(R.id.etNotes)
+        btnSave = findViewById(R.id.btnSave)
+        btnDelete = findViewById(R.id.btnDelete)
     }
 
-    private fun showDatePicker() {
-        val cal = Calendar.getInstance().apply { timeInMillis = selectedDateTime }
-        DatePickerDialog(
-            this,
-            { _, y, m, d ->
-                cal.set(Calendar.YEAR, y)
-                cal.set(Calendar.MONTH, m)
-                cal.set(Calendar.DAY_OF_MONTH, d)
-                selectedDateTime = cal.timeInMillis
-                textWhen.text = fmtFull.format(Date(selectedDateTime))
-            },
-            cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)
-        ).show()
+    private fun wirePickers() {
+        btnPickDate.setOnClickListener {
+            DatePickerDialog(
+                this,
+                { _, y, m, d ->
+                    cal.set(Calendar.YEAR, y)
+                    cal.set(Calendar.MONTH, m)
+                    cal.set(Calendar.DAY_OF_MONTH, d)
+                    refreshButtons()
+                },
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        btnPickTime.setOnClickListener {
+            TimePickerDialog(
+                this,
+                { _, h, min ->
+                    cal.set(Calendar.HOUR_OF_DAY, h)
+                    cal.set(Calendar.MINUTE, min)
+                    cal.set(Calendar.SECOND, 0)
+                    refreshButtons()
+                },
+                cal.get(Calendar.HOUR_OF_DAY),
+                cal.get(Calendar.MINUTE),
+                true
+            ).show()
+        }
     }
 
-    private fun showTimePicker() {
-        val cal = Calendar.getInstance().apply { timeInMillis = selectedDateTime }
-        TimePickerDialog(
-            this,
-            { _, h, min ->
-                cal.set(Calendar.HOUR_OF_DAY, h)
-                cal.set(Calendar.MINUTE, min)
-                cal.set(Calendar.SECOND, 0)
-                cal.set(Calendar.MILLISECOND, 0)
-                selectedDateTime = cal.timeInMillis
-                textWhen.text = fmtFull.format(Date(selectedDateTime))
-            },
-            cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), true
-        ).show()
+    private fun refreshButtons() {
+        btnPickDate.text = dateFmt.format(cal.time)
+        btnPickTime.text = timeFmt.format(cal.time)
     }
 
-    private fun saveChanges() {
-        val a = appointment ?: return
-        val updated = a.copy(
-            dateTime = selectedDateTime,
-            status = spinnerStatus.selectedItem?.toString() ?: "PENDING",
-            treatment = editTreatment.text?.toString(),
-            charge = editCharge.text?.toString(),
-            notes = editNotes.text?.toString()
+    private fun populate(a: Appointment) {
+        // TODO: ΒΑΛΕ τα σωστά ΟΝΟΜΑΤΑ ΠΕΔΙΩΝ από το entity Appointment
+        // Παραδείγματα: startMillis OR startTimeMillis OR timeMillis
+        val start = /* a.startMillis OR a.startTimeMillis OR a.timeMillis */ 0L
+        // Παραδείγματα: durationMinutes OR durationMin OR duration
+        val duration = /* a.durationMinutes OR a.durationMin OR a.duration */ 30
+        // Παραδείγματα: notes OR comment
+        val notes = /* a.notes OR a.comment */ null
+
+        cal.timeInMillis = start
+        refreshButtons()
+        etDuration.setText(duration.toString())
+        etNotes.setText(notes ?: "")
+    }
+
+    private fun collect(): Appointment? {
+        val base = existing ?: return null
+        val duration = etDuration.text.toString().toIntOrNull() ?: 30
+        val notes = etNotes.text.toString().trim().ifEmpty { null }
+        val whenMillis = cal.timeInMillis
+
+        // TODO: Ενημέρωσε τα ΟΝΟΜΑΤΑ πεδίων στο copy(...) ώστε να ταιριάζουν 1:1 με το Appointment
+        return base.copy(
+            /* startMillis = */ whenMillis,
+            /* durationMinutes = */ duration,
+            /* notes = */ notes
         )
-        scope.launch(Dispatchers.IO) {
-            PodologiaDatabase.getDatabase(this@EditAppointmentActivity).appointmentDao().update(updated)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(this@EditAppointmentActivity, "Αποθηκεύτηκε", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
-
-    private fun confirmDelete() {
-        AlertDialog.Builder(this)
-            .setTitle("Διαγραφή ραντεβού")
-            .setMessage("Σίγουρα θέλεις να διαγράψεις αυτό το ραντεβού;")
-            .setPositiveButton("Ναι") { _, _ -> deleteAppointment() }
-            .setNegativeButton("Όχι", null)
-            .show()
-    }
-
-    private fun deleteAppointment() {
-        val a = appointment ?: return
-        scope.launch(Dispatchers.IO) {
-            PodologiaDatabase.getDatabase(this@EditAppointmentActivity).appointmentDao().delete(a)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(this@EditAppointmentActivity, "Διαγράφηκε", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        scope.cancel()
     }
 }

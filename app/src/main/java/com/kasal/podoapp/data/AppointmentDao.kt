@@ -3,8 +3,10 @@ package com.kasal.podoapp.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -28,8 +30,15 @@ interface AppointmentDao {
     @Query("UPDATE appointments SET status = :status WHERE id = :id")
     suspend fun updateStatus(id: Int, status: String)
 
+    // Χρησιμοποιείται για να εισάγει ή να ενημερώσει ένα ραντεβού
+    @Upsert
+    suspend fun upsert(appointment: Appointment)
+
     // Προαιρετικό syntactic sugar για τη ροή "ολοκλήρωση ραντεβού"
     suspend fun markCompleted(id: Int) = updateStatus(id, "COMPLETED")
+
+    // Προαιρετικό syntactic sugar για να ακυρώσει ένα ραντεβού
+    suspend fun markCanceled(id: Int) = updateStatus(id, "CANCELED")
 
     @Query("""
         SELECT * FROM appointments
