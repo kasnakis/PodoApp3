@@ -27,7 +27,7 @@ class EditAppointmentActivity : AppCompatActivity() {
     private lateinit var etDuration: EditText
     private lateinit var etNotes: EditText
     private lateinit var btnSave: Button
-    private lateinit var btnDelete: Button
+    private lateinit var tvDelete: TextView
 
     private val cal = Calendar.getInstance()
     private val dateFmt = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -41,8 +41,9 @@ class EditAppointmentActivity : AppCompatActivity() {
 
         appointmentId = intent.getIntExtra("appointmentId", 0)
         patientId = intent.getIntExtra("patientId", 0)
-        if (appointmentId <= 0) {
-            Toast.makeText(this, "Άκυρο ραντεβού", Toast.LENGTH_LONG).show()
+
+        if (appointmentId <= 0 && patientId <= 0) {
+            Toast.makeText(this, "Invalid request", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -77,7 +78,7 @@ class EditAppointmentActivity : AppCompatActivity() {
             }
         }
 
-        btnDelete.setOnClickListener {
+        tvDelete.setOnClickListener {
             lifecycleScope.launch(Dispatchers.IO) {
                 existing?.let { db.appointmentDao().deleteById(it.id) }
                 withContext(Dispatchers.Main) {
@@ -95,7 +96,7 @@ class EditAppointmentActivity : AppCompatActivity() {
         etDuration = findViewById(R.id.etDuration)
         etNotes = findViewById(R.id.etNotes)
         btnSave = findViewById(R.id.btnSave)
-        btnDelete = findViewById(R.id.btnDelete)
+        tvDelete = findViewById(R.id.tvDelete)
     }
 
     private fun wirePickers() {
@@ -136,31 +137,24 @@ class EditAppointmentActivity : AppCompatActivity() {
     }
 
     private fun populate(a: Appointment) {
-        // TODO: ΒΑΛΕ τα σωστά ΟΝΟΜΑΤΑ ΠΕΔΙΩΝ από το entity Appointment
-        // Παραδείγματα: startMillis OR startTimeMillis OR timeMillis
-        val start = /* a.startMillis OR a.startTimeMillis OR a.timeMillis */ 0L
-        // Παραδείγματα: durationMinutes OR durationMin OR duration
-        val duration = /* a.durationMinutes OR a.durationMin OR a.duration */ 30
-        // Παραδείγματα: notes OR comment
-        val notes = /* a.notes OR a.comment */ null
+        val start = a.dateTime
+        val notes = a.notes
+        // The Appointment data class doesn't have a 'duration' field, so this line is removed.
 
         cal.timeInMillis = start
         refreshButtons()
-        etDuration.setText(duration.toString())
         etNotes.setText(notes ?: "")
     }
 
     private fun collect(): Appointment? {
         val base = existing ?: return null
-        val duration = etDuration.text.toString().toIntOrNull() ?: 30
         val notes = etNotes.text.toString().trim().ifEmpty { null }
         val whenMillis = cal.timeInMillis
 
-        // TODO: Ενημέρωσε τα ΟΝΟΜΑΤΑ πεδίων στο copy(...) ώστε να ταιριάζουν 1:1 με το Appointment
+        // The Appointment data class doesn't have a 'duration' field, so this parameter is removed.
         return base.copy(
-            /* startMillis = */ whenMillis,
-            /* durationMinutes = */ duration,
-            /* notes = */ notes
+            dateTime = whenMillis,
+            notes = notes
         )
     }
 }
