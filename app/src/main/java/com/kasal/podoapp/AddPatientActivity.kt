@@ -1,5 +1,6 @@
 package com.kasal.podoapp.ui
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -11,8 +12,18 @@ import com.kasal.podoapp.data.PodologiaDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AddPatientActivity : AppCompatActivity() {
+
+    // Helper για τη μορφοποίηση της ημερομηνίας
+    private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+
+    // Ημερομηνία που επιλέγει ο χρήστης
+    private val myCalendar = Calendar.getInstance()
+
+    private lateinit var birthDateEditText: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,12 +33,34 @@ class AddPatientActivity : AppCompatActivity() {
         val phoneEditText = findViewById<EditText>(R.id.editTextPhone)
         val cardCodeEditText = findViewById<EditText>(R.id.editTextCardCode)
         val emailEditText = findViewById<EditText>(R.id.editTextEmail)
-        val birthDateEditText = findViewById<EditText>(R.id.editTextBirthDate)
+        birthDateEditText = findViewById(R.id.editTextBirthDate)
         val professionEditText = findViewById<EditText>(R.id.editTextProfession)
         val notesEditText = findViewById<EditText>(R.id.editTextNotes)
         val saveButton = findViewById<Button>(R.id.buttonSave)
 
         val db = PodologiaDatabase.getDatabase(this)
+
+        // Ρυθμίζουμε το EditText να μην είναι εστιασμένο, ώστε να ανοίγει μόνο με κλικ
+        birthDateEditText.isFocusable = false
+        birthDateEditText.isClickable = true
+
+        // Εδώ είναι η σημαντική αλλαγή:
+        // Με το κλικ στο πεδίο, ανοίγουμε το DatePickerDialog
+        birthDateEditText.setOnClickListener {
+            DatePickerDialog(
+                this,
+                { _, year, monthOfYear, dayOfMonth ->
+                    myCalendar.set(Calendar.YEAR, year)
+                    myCalendar.set(Calendar.MONTH, monthOfYear)
+                    myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    // Μορφοποιούμε την ημερομηνία με το νέο format και την εμφανίζουμε στο EditText
+                    birthDateEditText.setText(dateFormat.format(myCalendar.time))
+                },
+                myCalendar.get(Calendar.YEAR),
+                myCalendar.get(Calendar.MONTH),
+                myCalendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
 
         saveButton.setOnClickListener {
             val name = nameEditText.text.toString().trim()

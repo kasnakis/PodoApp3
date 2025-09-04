@@ -7,47 +7,50 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:gravity="center">
 
-        <!-- ΛΟΓΟΤΥΠΟ -->
         <ImageView
             android:id="@+id/imgLogo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/app_name"
             android:src="@drawable/podologiko_logo_small"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="32dp" />
 
-        <!-- Πελάτες -->
         <Button
             android:id="@+id/btnAddPatient"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:text="Νέος Πελάτης" />
+            android:text="Νέος Πελάτης"
+            android:backgroundTint="@color/button_blue"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
 
         <Button
             android:id="@+id/btnPatientList"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:text="Λίστα Πελατών"
-            android:layout_marginTop="8dp" />
+            android:backgroundTint="@color/button_green"
+            android:layout_marginBottom="8dp"/>
 
-        <!-- Ραντεβού -->
         <Button
             android:id="@+id/btnNewAppointment"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:text="Νέο Ραντεβού"
-            android:layout_marginTop="16dp" />
+            android:backgroundTint="@color/button_orange"
+            android:layout_marginBottom="8dp"/>
 
         <Button
             android:id="@+id/btnAppointmentCalendar"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:text="Ημερολόγιο Ραντεβού"
-            android:layout_marginTop="8dp" />
+            android:backgroundTint="@color/button_purple"
+            android:layout_marginBottom="8dp"/>
 
     </LinearLayout>
 </ScrollView>

@@ -7,4 +7,10 @@
     <color name="black">#000000</color>
     <color name="grayLight">#F5F5F5</color>
     <color name="grayDark">#333333</color>
+
+    <color name="button_blue">#2196F3</color>
+    <color name="button_green">#4CAF50</color>
+    <color name="button_orange">#FF9800</color>
+    <color name="button_purple">#9C27B0</color>
+
 </resources>
