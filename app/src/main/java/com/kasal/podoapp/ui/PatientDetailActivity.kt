@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kasal.podoapp.R
 import com.kasal.podoapp.PatientPhotoAdapter
 import com.kasal.podoapp.data.Patient
-import com.kasal.podoapp.data.PatientHistory
 import com.kasal.podoapp.data.PatientPhoto
 import com.kasal.podoapp.data.PodologiaDatabase
 import com.kasal.podoapp.openPatientHistory
@@ -32,57 +31,21 @@ import kotlinx.coroutines.withContext
 class PatientDetailActivity : AppCompatActivity() {
 
     private var patientId: Int = 0
-    private var existing: PatientHistory? = null
 
-    // --- Ιατρικά πεδία ---
-    private lateinit var etDoctorName: EditText
-    private lateinit var etDoctorPhone: EditText
-    private var etDiagnosis: EditText? = null   // ⬅ προαιρετικό για να μη σκάει αν λείπει από το layout
-    private lateinit var etMedication: EditText
-    private lateinit var etAllergies: EditText
+    // Κουμπιά πλοήγησης
+    private var btnVisitHistory: Button? = null
+    private var btnPatientAppointments: Button? = null
+    private var btnNewAppointment: Button? = null
+    private var btnOpenHistory: Button? = null
 
-    // --- Διαβήτης ---
-    private lateinit var switchDiabetic: Switch
-    private lateinit var spinnerDiabeticType: Spinner
-    private lateinit var etInsulinNotes: EditText
-    private lateinit var etPillsNotes: EditText
-
-    // --- Παραμορφώσεις/στάση ---
-    private lateinit var cbMetatarsalDrop: CheckBox
-    private lateinit var cbValgus: CheckBox
-    private lateinit var cbVarus: CheckBox
-    private lateinit var cbEquinus: CheckBox
-    private lateinit var cbCavus: CheckBox
-    private lateinit var cbFlatfoot: CheckBox
-    private lateinit var cbPronation: CheckBox
-    private lateinit var cbSupination: CheckBox
-
-    // --- Αγγειακά (δεξί) ---
-    private lateinit var cbEdemaRight: CheckBox
-    private lateinit var cbVaricoseDorsalRight: CheckBox
-    private lateinit var cbVaricosePlantarRight: CheckBox
-
-    // --- Νάρθηκας/Ορθωτικά ---
-    private lateinit var etSplintNotes: EditText
-    private lateinit var spinnerOrthoticType: Spinner
-
-    // --- Κουμπιά ---
-    private lateinit var btnSave: Button
-    private lateinit var btnVisitHistory: Button
-    private lateinit var btnPatientAppointments: Button
-    private lateinit var btnNewAppointment: Button
-    private lateinit var btnOpenHistory: Button
-
-    // --- Photos UI ---
+    // Photos UI
     private lateinit var btnAddFromCamera: Button
     private lateinit var btnAddFromGallery: Button
     private lateinit var recyclerPatientPhotos: RecyclerView
     private lateinit var photoAdapter: PatientPhotoAdapter
     private var pendingCameraUri: Uri? = null
 
-    private val orthoticTypes = arrayOf("NONE", "STOCK", "CUSTOM")
-    private val diabeticTypes = arrayOf("", "TYPE_1", "TYPE_2")
-
+    // Permissions (images)
     private val requestPhotosPerms = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
@@ -104,7 +67,8 @@ class PatientDetailActivity : AppCompatActivity() {
 
     private val requestCameraPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) startCameraNow() else Toast.makeText(this, "Η κάμερα δεν έχει άδεια.", Toast.LENGTH_LONG).show()
+            if (granted) startCameraNow()
+            else Toast.makeText(this, "Η κάμερα δεν έχει άδεια.", Toast.LENGTH_LONG).show()
         }
 
     private val requestMultiplePermissions =
@@ -117,6 +81,7 @@ class PatientDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_patient_detail)
 
+        // Διαβάζουμε patientId
         val extraId = intent.getIntExtra("patientId", 0)
         patientId = if (extraId > 0) extraId else (intent.getSerializableExtra("patient") as? Patient)?.id ?: 0
         if (patientId <= 0) { Toast.makeText(this, "Άκυρο patientId", Toast.LENGTH_LONG).show(); finish(); return }
@@ -124,39 +89,20 @@ class PatientDetailActivity : AppCompatActivity() {
         bindViews()
         setPatientNameInTitleAndHeader(patientId)
 
-        // Πλοήγηση
-        btnVisitHistory.setOnClickListener {
+        // Πλοήγηση (κουμπιά είναι προαιρετικά στο layout – αν υπάρχουν, βάζουμε listeners)
+        btnVisitHistory?.setOnClickListener {
             val i = Intent(this, VisitListActivity::class.java).putExtra("patientId", patientId)
             startActivity(i)
         }
-        btnPatientAppointments.setOnClickListener {
+        btnPatientAppointments?.setOnClickListener {
             val i = Intent(this, AppointmentActivity::class.java).putExtra("patientId", patientId)
             startActivity(i)
         }
-        btnNewAppointment.setOnClickListener {
+        btnNewAppointment?.setOnClickListener {
             val i = Intent(this, NewAppointmentActivity::class.java).putExtra("patientId", patientId)
             startActivity(i)
         }
-        btnOpenHistory.setOnClickListener { openPatientHistory(patientId) }
-
-        setupSpinners()
-
-        val db = PodologiaDatabase.getDatabase(this)
-        lifecycleScope.launch {
-            existing = withContext(Dispatchers.IO) { db.patientHistoryDao().getByPatientId(patientId) }
-            existing?.let { populate(it) }
-
-            btnSave.setOnClickListener {
-                val history = collectForm(existing?.id)
-                lifecycleScope.launch(Dispatchers.IO) {
-                    db.patientHistoryDao().upsert(history)
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@PatientDetailActivity, "Αποθηκεύτηκε το Αναμνηστικό", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-                }
-            }
-        }
+        btnOpenHistory?.setOnClickListener { openPatientHistory(patientId) }
 
         // Photos
         photoAdapter = PatientPhotoAdapter(
@@ -178,7 +124,7 @@ class PatientDetailActivity : AppCompatActivity() {
         migrateOldPickerUrisIfAny()
     }
 
-    /** Δεν απαιτεί να υπάρχει TextView header — αν υπάρχει, τον ενημερώνει */
+    /** Προαιρετικός header: ενημερώνεται αν υπάρχει στο layout */
     private fun setPatientNameInTitleAndHeader(id: Int) {
         val db = PodologiaDatabase.getDatabase(this)
         CoroutineScope(Dispatchers.IO).launch {
@@ -200,10 +146,8 @@ class PatientDetailActivity : AppCompatActivity() {
         }
     }
 
-    // Βοηθός: βρίσκει View δοκιμάζοντας πολλά ονόματα id (για πίσω συμβατότητα)
-    private inline fun <reified T : View> findOptional(vararg idNames: String): T? {
-        for (name in idNames) {
-            val id = resources.getIdentifier(name, "id", packageName)
+    private inline fun <reified T : View> findOptional(vararg ids: Int): T? {
+        for (id in ids) {
             if (id != 0) {
                 val v: View? = findViewById(id)
                 if (v is T) return v
@@ -212,133 +156,17 @@ class PatientDetailActivity : AppCompatActivity() {
         return null
     }
 
-    private inline fun <reified T : View> findRequired(id: Int): T =
-        findViewById(id) ?: error("Λείπει υποχρεωτικό view id=$id")
-
     private fun bindViews() {
-        // Ιατρικά
-        etDoctorName = findRequired(R.id.etDoctorName)
-        etDoctorPhone = findRequired(R.id.etDoctorPhone)
-        etDiagnosis   = findOptional<EditText>("etDiagnosis", "etDoctorDiagnosis") // ⬅ αν λείπει, μένει null
-        etMedication  = findRequired(R.id.etMedication)
-        etAllergies   = findRequired(R.id.etAllergies)
+        // Προαιρετικά navigation buttons (αν υπάρχουν στο layout)
+        btnVisitHistory        = findOptional(R.id.btnVisitHistory)
+        btnPatientAppointments = findOptional(R.id.btnPatientAppointments)
+        btnNewAppointment      = findOptional(R.id.btnNewAppointment)
+        btnOpenHistory         = findOptional(R.id.btnOpenHistory)
 
-        // Διαβήτης
-        switchDiabetic      = findRequired(R.id.switchDiabetic)
-        spinnerDiabeticType = findRequired(R.id.spinnerDiabeticType)
-        etInsulinNotes      = findRequired(R.id.etInsulinNotes)
-        etPillsNotes        = findRequired(R.id.etPillsNotes)
-
-        // Παραμορφώσεις/στάση
-        cbMetatarsalDrop = findRequired(R.id.cbMetatarsalDrop)
-        cbValgus         = findRequired(R.id.cbValgus)
-        cbVarus          = findRequired(R.id.cbVarus)
-        cbEquinus        = findRequired(R.id.cbEquinus)
-        cbCavus          = findRequired(R.id.cbCavus)
-        cbFlatfoot       = findRequired(R.id.cbFlatfoot)
-        cbPronation      = findRequired(R.id.cbPronation)
-        cbSupination     = findRequired(R.id.cbSupination)
-
-        // Αγγειακά (δεξί) – εναλλακτικά ids για backwards-compat
-        cbEdemaRight           = findOptional<CheckBox>("cbEdemaRight", "cbedemaRight", "cbEdema_right")
-            ?: error("Λείπει CheckBox για οίδημα δεξί")
-        cbVaricoseDorsalRight  = findOptional<CheckBox>("cbVaricoseDorsalRight", "cbvaricoseDorsalRight")
-            ?: error("Λείπει CheckBox για ραχιαίους κιρσούς δεξί")
-        cbVaricosePlantarRight = findOptional<CheckBox>("cbVaricosePlantarRight", "cbvaricosePlantarRight")
-            ?: error("Λείπει CheckBox για πελματιαίους κιρσούς δεξί")
-
-        // Νάρθηκας/Ορθωτικά
-        etSplintNotes       = findRequired(R.id.etSplintNotes)
-        spinnerOrthoticType = findRequired(R.id.spinnerOrthoticType)
-
-        // Κουμπιά
-        btnSave                = findRequired(R.id.btnSaveHistory)
-        btnVisitHistory        = findRequired(R.id.btnVisitHistory)
-        btnPatientAppointments = findRequired(R.id.btnPatientAppointments)
-        btnNewAppointment      = findRequired(R.id.btnNewAppointment)
-        btnOpenHistory         = findRequired(R.id.btnOpenHistory)
-
-        // Photos
-        btnAddFromCamera      = findRequired(R.id.btnAddFromCamera)
-        btnAddFromGallery     = findRequired(R.id.btnAddFromGallery)
-        recyclerPatientPhotos = findRequired(R.id.recyclerPatientPhotos)
-    }
-
-    private fun setupSpinners() {
-        spinnerDiabeticType.adapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, diabeticTypes)
-        spinnerOrthoticType.adapter =
-            ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, orthoticTypes)
-    }
-
-    private fun populate(h: PatientHistory) {
-        etDoctorName.setText(h.doctorName ?: "")
-        etDoctorPhone.setText(h.doctorPhone ?: "")
-        etDiagnosis?.setText(h.doctorDiagnosis ?: "")  // ⬅ ασφαλές
-        etMedication.setText(h.medication ?: "")
-        etAllergies.setText(h.allergies ?: "")
-
-        switchDiabetic.isChecked = h.isDiabetic
-        val diabIndex = diabeticTypes.indexOf(h.diabeticType ?: "")
-        spinnerDiabeticType.setSelection(if (diabIndex >= 0) diabIndex else 0)
-
-        etInsulinNotes.setText(h.insulinNotes ?: "")
-        etPillsNotes.setText(h.pillsNotes ?: "")
-
-        cbMetatarsalDrop.isChecked = h.metatarsalDrop
-        cbValgus.isChecked         = h.valgus
-        cbVarus.isChecked          = h.varus
-        cbEquinus.isChecked        = h.equinus
-        cbCavus.isChecked          = h.cavus
-        cbFlatfoot.isChecked       = h.flatfoot
-        cbPronation.isChecked      = h.pronation
-        cbSupination.isChecked     = h.supination
-
-        cbEdemaRight.isChecked           = h.edemaRight
-        cbVaricoseDorsalRight.isChecked  = h.varicoseDorsalRight
-        cbVaricosePlantarRight.isChecked = h.varicosePlantarRight
-
-        etSplintNotes.setText(h.splintNotes ?: "")
-
-        val orthoIndex = orthoticTypes.indexOf(h.orthoticType ?: "NONE")
-        spinnerOrthoticType.setSelection(if (orthoIndex >= 0) orthoIndex else 0)
-    }
-
-    private fun collectForm(existingId: Int?): PatientHistory {
-        return PatientHistory(
-            id = existingId ?: 0,
-            patientId = patientId,
-
-            doctorName      = etDoctorName.text.toString().trim().ifEmpty { null },
-            doctorPhone     = etDoctorPhone.text.toString().trim().ifEmpty { null },
-            doctorDiagnosis = etDiagnosis?.text?.toString()?.trim()?.ifEmpty { null }, // ⬅ ασφαλές
-            medication      = etMedication.text.toString().trim().ifEmpty { null },
-            allergies       = etAllergies.text.toString().trim().ifEmpty { null },
-
-            isDiabetic   = switchDiabetic.isChecked,
-            diabeticType = diabeticTypes[spinnerDiabeticType.selectedItemPosition].ifEmpty { null },
-            insulinNotes = etInsulinNotes.text.toString().trim().ifEmpty { null },
-            pillsNotes   = etPillsNotes.text.toString().trim().ifEmpty { null },
-
-            metatarsalDrop = cbMetatarsalDrop.isChecked,
-            valgus         = cbValgus.isChecked,
-            varus          = cbVarus.isChecked,
-            equinus        = cbEquinus.isChecked,
-            cavus          = cbCavus.isChecked,
-            flatfoot       = cbFlatfoot.isChecked,
-            pronation      = cbPronation.isChecked,
-            supination     = cbSupination.isChecked,
-
-            edemaLeft            = existing?.edemaLeft ?: false,
-            edemaRight           = cbEdemaRight.isChecked,
-            varicoseDorsalLeft   = existing?.varicoseDorsalLeft ?: false,
-            varicoseDorsalRight  = cbVaricoseDorsalRight.isChecked,
-            varicosePlantarLeft  = existing?.varicosePlantarLeft ?: false,
-            varicosePlantarRight = cbVaricosePlantarRight.isChecked,
-
-            splintNotes = etSplintNotes.text.toString().trim().ifEmpty { null },
-            orthoticType = orthoticTypes[spinnerOrthoticType.selectedItemPosition]
-        )
+        // Photos (υποχρεωτικά)
+        btnAddFromCamera       = findViewById(R.id.btnAddFromCamera)
+        btnAddFromGallery      = findViewById(R.id.btnAddFromGallery)
+        recyclerPatientPhotos  = findViewById(R.id.recyclerPatientPhotos)
     }
 
     // ---------------- Photos ----------------

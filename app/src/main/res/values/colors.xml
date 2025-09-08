@@ -13,4 +13,20 @@
     <color name="button_orange">#FF9800</color>
     <color name="button_purple">#9C27B0</color>
 
+    <color name="podo_primary">#006F6A</color>
+    <color name="podo_primary_dark">#00514D</color>
+    <color name="podo_on_primary">#FFFFFF</color>
+
+    <color name="podo_accent">#FFB300</color> <color name="podo_on_accent">#212121</color>
+
+    <color name="podo_surface">#F7FBFA</color>
+    <color name="podo_card">#FFFFFF</color>
+    <color name="podo_divider">#E0E0E0</color>
+
+    <color name="podo_text">#212121</color>
+    <color name="podo_text_secondary">#666666</color>
+
+    <color name="podo_tab_bg">@color/podo_primary</color>
+    <color name="podo_tab_text_unselected">#B3FFFFFF</color> <color name="podo_tab_text_selected">@color/podo_on_primary</color>
+    <color name="podo_tab_indicator">@color/podo_accent</color>
 </resources>

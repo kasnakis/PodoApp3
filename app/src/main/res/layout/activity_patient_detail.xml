@@ -1,207 +1,216 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="12dp">
+    android:background="@color/podo_surface"
+    tools:context=".ui.PatientDetailActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:id="@+id/patientActionsRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
-
-            <Button
-                android:id="@+id/btnVisitHistory"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Ιστορικό Επισκέψεων" />
-
-            <Button
-                android:id="@+id/btnPatientAppointments"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="Ραντεβού" />
-
-            <Button
-                android:id="@+id/btnNewAppointment"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:text="Νέο Ραντεβού" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btnOpenHistory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Αναμνηστικό (History Tabs)"/>
+    <!-- Έγχρωμος header με στρογγυλεμένο κάτω μέρος -->
+    <FrameLayout
+        android:id="@+id/header"
+        android:layout_width="0dp"
+        android:layout_height="92dp"
+        android:background="@drawable/bg_top_header"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:id="@+id/textPatientNameHeader"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="18sp"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|start"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
             android:text="Όνομα πελάτη"
-            android:layout_marginBottom="8dp" />
+            android:textColor="@color/podo_on_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+    </FrameLayout>
 
-        <EditText
-            android:id="@+id/etDoctorName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Ονοματεπώνυμο Ιατρού" />
-
-        <EditText
-            android:id="@+id/etDoctorPhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Τηλέφωνο Ιατρού"
-            android:inputType="phone" />
-
-        <EditText
-            android:id="@+id/etDiagnosis"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Διάγνωση ιατρού" />
-
-        <EditText
-            android:id="@+id/etMedication"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Φαρμακευτική αγωγή" />
-
-        <EditText
-            android:id="@+id/etAllergies"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Αλλεργίες" />
-
-        <EditText
-            android:id="@+id/etDoctorDiagnosis"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Διάγνωση" />
-
-        <Switch
-            android:id="@+id/switchDiabetic"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Διαβητικός" />
-
-        <Spinner
-            android:id="@+id/spinnerDiabeticType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <EditText
-            android:id="@+id/etInsulinNotes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Σημειώσεις ινσουλίνης" />
-
-        <EditText
-            android:id="@+id/etPillsNotes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Σημειώσεις για χάπια" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Παραμορφώσεις/Στάση"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <CheckBox android:id="@+id/cbMetatarsalDrop" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Πτώση Μεταταρσίου" />
-        <CheckBox android:id="@+id/cbValgus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Βλαισός" />
-        <CheckBox android:id="@+id/cbVarus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ραιβός" />
-        <CheckBox android:id="@+id/cbEquinus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ιπποποδία" />
-        <CheckBox android:id="@+id/cbCavus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κοιλοποδία" />
-        <CheckBox android:id="@+id/cbFlatfoot" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Πλατυποδία" />
-        <CheckBox android:id="@+id/cbPronation" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Πρηνισμός" />
-        <CheckBox android:id="@+id/cbSupination" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Υπτιασμός" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Αγγειακά (Δεξί πόδι)"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <CheckBox android:id="@+id/cbEdemaRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Οίδημα" />
-        <CheckBox android:id="@+id/cbVaricoseDorsalRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί ραχιαίοι" />
-        <CheckBox android:id="@+id/cbVaricosePlantarRight" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί πελματιαίοι" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Αγγειακά (Αριστερό πόδι)"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
-
-        <CheckBox android:id="@+id/cbEdemaLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Οίδημα" />
-        <CheckBox android:id="@+id/cbVaricoseDorsalLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί ραχιαίοι" />
-        <CheckBox android:id="@+id/cbVaricosePlantarLeft" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Κιρσοί πελματιαίοι" />
-
-        <EditText
-            android:id="@+id/etSplintNotes"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Νάρθηκας - σημειώσεις" />
-
-        <Spinner
-            android:id="@+id/spinnerOrthoticType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Φωτογραφίες"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"/>
+    <!-- Κάρτα με κουμπιά πλοήγησης -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardActions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="14dp"
+        app:cardBackgroundColor="@color/podo_card"
+        app:layout_constraintTop_toBottomOf="@+id/header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button
-                android:id="@+id/btnAddFromCamera"
-                android:layout_width="0dp"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Από κάμερα" />
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:dividerPadding="8dp"
+                android:showDividers="middle"
+                android:divider="@drawable/divider_invisible">
+
+                <!-- Επισκέψεις -->
+                <Button
+                    android:id="@+id/btnVisitHistory"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="72dp"
+                    android:layout_weight="1"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center"
+                    android:singleLine="false"
+                    android:maxLines="2"
+                    android:lineSpacingExtra="2dp"
+                    android:text="Επισκέψεις"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="@color/podo_on_primary"
+                    android:backgroundTint="@color/podo_primary"
+                    android:drawableStart="@android:drawable/ic_menu_recent_history"
+                    android:drawablePadding="8dp"/>
+
+                <!-- Ραντεβού -->
+                <Button
+                    android:id="@+id/btnPatientAppointments"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="72dp"
+                    android:layout_weight="1"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center"
+                    android:singleLine="false"
+                    android:maxLines="2"
+                    android:lineSpacingExtra="2dp"
+                    android:text="Ραντεβού"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="@color/podo_on_primary"
+                    android:backgroundTint="@color/podo_primary"
+                    android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                    android:drawablePadding="8dp"/>
+
+                <!-- Νέο ραντεβού -->
+                <Button
+                    android:id="@+id/btnNewAppointment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="72dp"
+                    android:layout_weight="1"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center"
+                    android:singleLine="false"
+                    android:maxLines="2"
+                    android:lineSpacingExtra="2dp"
+                    android:text="Νέο ραντεβού"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="@color/podo_on_primary"
+                    android:backgroundTint="@color/podo_accent"
+                    android:drawableStart="@android:drawable/ic_input_add"
+                    android:drawablePadding="8dp"/>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnOpenHistory"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:text="Αναμνηστικό (Tabs)"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@color/podo_on_accent"
+                android:backgroundTint="@color/podo_accent"
+                android:drawableStart="@android:drawable/ic_menu_info_details"
+                android:drawablePadding="8dp"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Κάρτα: Ενέργειες φωτογραφιών -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardPhotoActions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="14dp"
+        app:cardBackgroundColor="@color/podo_card"
+        app:layout_constraintTop_toBottomOf="@id/cardActions"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center"
+            android:dividerPadding="8dp"
+            android:showDividers="middle"
+            android:divider="@drawable/divider_invisible">
+
             <Button
                 android:id="@+id/btnAddFromGallery"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:text="Από συλλογή" />
+                android:text="Από Gallery"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@color/podo_on_primary"
+                android:backgroundTint="@color/podo_primary"
+                android:drawableStart="@android:drawable/ic_menu_gallery"
+                android:drawablePadding="8dp"/>
+
+            <Button
+                android:id="@+id/btnAddFromCamera"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_weight="1"
+                android:text="Κάμερα"
+                android:textAllCaps="false"
+                android:textStyle="bold"
+                android:textColor="@color/podo_on_primary"
+                android:backgroundTint="@color/podo_primary"
+                android:drawableStart="@android:drawable/ic_menu_camera"
+                android:drawablePadding="8dp"/>
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Κάρτα: Grid φωτογραφιών -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardPhotos"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="14dp"
+        app:cardBackgroundColor="@color/podo_card"
+        app:layout_constraintTop_toBottomOf="@id/cardPhotoActions"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerPatientPhotos"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="vertical"/>
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            tools:listitem="@layout/item_patient_photo"/>
+    </androidx.cardview.widget.CardView>
 
-        <Button
-            android:id="@+id/btnSaveHistory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Αποθήκευση Ιστορικού" />
-    </LinearLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
