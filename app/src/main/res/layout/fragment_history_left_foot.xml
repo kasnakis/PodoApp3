@@ -21,32 +21,45 @@
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="Δερματοφυτία (αριστερό)"/>
 
-        <EditText android:id="@+id/etLeftDorsalCalluses"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Κάλοι ράχης (αριστερό)" android:inputType="textMultiLine"/>
+        <!-- ΝΕΑ: Κάλοι booleans -->
+        <CheckBox
+            android:id="@+id/cbCornDorsalLeft"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Κάλοι ραχιαίοι (αριστερό)"/>
 
-        <EditText android:id="@+id/etLeftInterdigitalCalluses"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Κάλοι μεσοδακτύλιοι (αριστερό)" android:inputType="textMultiLine"/>
+        <CheckBox
+            android:id="@+id/cbCornPlantarLeft"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Κάλοι πελματιαίοι (αριστερό)"/>
 
-        <EditText android:id="@+id/etLeftPlantarCalluses"
+        <!-- Notes -->
+        <EditText android:id="@+id/etLeftDorsalCallusesNotes"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Κάλοι πελματιαίοι (αριστερό)" android:inputType="textMultiLine"/>
+            android:hint="Κάλοι ραχιαίοι – σημειώσεις (αριστερό)" />
 
-        <EditText android:id="@+id/etLeftHammerToe"
+        <EditText android:id="@+id/etLeftInterdigitalCallusesNotes"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Σφυροδακτυλία (αριστερό)" android:inputType="textMultiLine"/>
+            android:hint="Κάλοι μεσοδακτύλιοι – σημειώσεις (αριστερό)" />
 
-        <EditText android:id="@+id/etLeftOnychomycosis"
+        <EditText android:id="@+id/etLeftPlantarCallusesNotes"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Ονυχομυκητίαση (αριστερό)" android:inputType="textMultiLine"/>
+            android:hint="Κάλοι πελματιαίοι – σημειώσεις (αριστερό)" />
 
-        <EditText android:id="@+id/etLeftOnychocryptosis"
+        <EditText android:id="@+id/etLeftHammerToeNotes"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Ονυχοκρύπτωση (αριστερό)" android:inputType="textMultiLine"/>
+            android:hint="Σφυροδακτυλία – σημειώσεις (αριστερό)" />
 
-        <EditText android:id="@+id/etLeftNailStatus"
+        <EditText android:id="@+id/etLeftOnychomycosisNotes"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:hint="Κατάσταση νυχιών (αριστερό)" android:inputType="textMultiLine"/>
+            android:hint="Ονυχομυκητίαση – σημειώσεις (αριστερό)" />
+
+        <EditText android:id="@+id/etLeftOnychocryptosisNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Ονυχοκρύπτωση – σημειώσεις (αριστερό)" />
+
+        <EditText android:id="@+id/etLeftNailStatusNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Κατάσταση νυχιών – σημειώσεις (αριστερό)" />
+
     </LinearLayout>
 </ScrollView>

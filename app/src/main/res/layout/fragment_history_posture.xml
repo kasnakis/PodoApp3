@@ -1,21 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
+
     <LinearLayout
         android:orientation="vertical" android:padding="16dp"
         android:layout_width="match_parent" android:layout_height="wrap_content">
 
-        <CheckBox android:id="@+id/cbMetatarsalDrop"
+        <!-- Legacy συνολικό -->
+        <CheckBox
+            android:id="@+id/cbMetatarsalDrop"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Πτώση μεταταρσίου"/>
+            android:text="Πτώση μεταταρσίου (συνολικό)"/>
+
+        <!-- Νέα: Left / Right -->
+        <CheckBox
+            android:id="@+id/cbMetatarsalDropLeft"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Πτώση μεταταρσίου — Αριστερό"/>
+
+        <CheckBox
+            android:id="@+id/cbMetatarsalDropRight"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Πτώση μεταταρσίου — Δεξί"/>
+
+        <View android:layout_width="match_parent" android:layout_height="8dp"/>
 
         <CheckBox android:id="@+id/cbValgus"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Βλαισότητα (Valgus)"/>
+            android:text="Βλαισοποδία (Valgus)"/>
 
         <CheckBox android:id="@+id/cbVarus"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Ραιβότητα (Varus)"/>
+            android:text="Ραιβοποδία (Varus)"/>
 
         <CheckBox android:id="@+id/cbEquinus"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -27,14 +43,14 @@
 
         <CheckBox android:id="@+id/cbFlatfoot"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Επιπεδοποδία"/>
+            android:text="Πλατυποδία (Flatfoot)"/>
 
         <CheckBox android:id="@+id/cbPronation"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Πρηνισμός"/>
+            android:text="Πρηνισμός (Pronation)"/>
 
         <CheckBox android:id="@+id/cbSupination"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="Υπτιασμός"/>
+            android:text="Υπτιασμός (Supination)"/>
     </LinearLayout>
 </ScrollView>

@@ -1,17 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="16dp"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/etSplintNotes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Νάρθηκας - σημειώσεις"
-        android:inputType="textMultiLine"/>
+    <LinearLayout
+        android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
 
-    <Spinner
-        android:id="@+id/spinnerOrthoticType"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+        <!-- Νάρθηκας -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Τοποθέτηση Νάρθηκα" android:textStyle="bold" android:textSize="16sp"
+            android:paddingBottom="8dp"/>
+
+        <Switch
+            android:id="@+id/switchHasSplint"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Υπάρχει;"/>
+
+        <EditText
+            android:id="@+id/etSplintType"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Τύπος νάρθηκα / σχόλια"/>
+
+        <EditText
+            android:id="@+id/etSplintNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Νάρθηκας - επιπλέον σημειώσεις"
+            android:inputType="textMultiLine"/>
+
+        <View android:layout_width="match_parent" android:layout_height="12dp"/>
+
+        <!-- Ορθωτικοί πάτοι -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Ορθωτικοί Πάτοι" android:textStyle="bold" android:textSize="16sp"
+            android:paddingBottom="8dp"/>
+
+        <Spinner
+            android:id="@+id/spinnerOrthoticType"
+            android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/etOrthoticNumber"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="No (κωδ./αριθμός)"/>
+
+        <EditText
+            android:id="@+id/etOrthoticNotes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Σημειώσεις ορθωτικών"
+            android:inputType="textMultiLine"/>
+
+    </LinearLayout>
+</ScrollView>

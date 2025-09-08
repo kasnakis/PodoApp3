@@ -17,47 +17,56 @@ class HistoryLeftFootFragment : Fragment(), HistorySection {
     private lateinit var cbLeftWarts: CheckBox
     private lateinit var cbLeftDermatophytosis: CheckBox
 
-    private lateinit var etLeftDorsalCalluses: EditText
-    private lateinit var etLeftInterdigitalCalluses: EditText
-    private lateinit var etLeftPlantarCalluses: EditText
-    private lateinit var etLeftHammerToe: EditText
-    private lateinit var etLeftOnychomycosis: EditText
-    private lateinit var etLeftOnychocryptosis: EditText
-    private lateinit var etLeftNailStatus: EditText
+    private lateinit var cbCornDorsalLeft: CheckBox // ΝΕΟ
+    private lateinit var cbCornPlantarLeft: CheckBox // ΝΕΟ
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_history_left_foot, container, false)
-    }
+    private lateinit var etLeftDorsalCallusesNotes: EditText
+    private lateinit var etLeftInterdigitalCallusesNotes: EditText
+    private lateinit var etLeftPlantarCallusesNotes: EditText
+    private lateinit var etLeftHammerToeNotes: EditText
+    private lateinit var etLeftOnychomycosisNotes: EditText
+    private lateinit var etLeftOnychocryptosisNotes: EditText
+    private lateinit var etLeftNailStatusNotes: EditText
 
-    override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val v = inflater.inflate(R.layout.fragment_history_left_foot, container, false)
+
         cbLeftHyperkeratosis = v.findViewById(R.id.cbLeftHyperkeratosis)
         cbLeftHalluxValgus = v.findViewById(R.id.cbLeftHalluxValgus)
         cbLeftWarts = v.findViewById(R.id.cbLeftWarts)
         cbLeftDermatophytosis = v.findViewById(R.id.cbLeftDermatophytosis)
 
-        etLeftDorsalCalluses = v.findViewById(R.id.etLeftDorsalCalluses)
-        etLeftInterdigitalCalluses = v.findViewById(R.id.etLeftInterdigitalCalluses)
-        etLeftPlantarCalluses = v.findViewById(R.id.etLeftPlantarCalluses)
-        etLeftHammerToe = v.findViewById(R.id.etLeftHammerToe)
-        etLeftOnychomycosis = v.findViewById(R.id.etLeftOnychomycosis)
-        etLeftOnychocryptosis = v.findViewById(R.id.etLeftOnychocryptosis)
-        etLeftNailStatus = v.findViewById(R.id.etLeftNailStatus)
+        cbCornDorsalLeft = v.findViewById(R.id.cbCornDorsalLeft)
+        cbCornPlantarLeft = v.findViewById(R.id.cbCornPlantarLeft)
+
+        etLeftDorsalCallusesNotes = v.findViewById(R.id.etLeftDorsalCallusesNotes)
+        etLeftInterdigitalCallusesNotes = v.findViewById(R.id.etLeftInterdigitalCallusesNotes)
+        etLeftPlantarCallusesNotes = v.findViewById(R.id.etLeftPlantarCallusesNotes)
+        etLeftHammerToeNotes = v.findViewById(R.id.etLeftHammerToeNotes)
+        etLeftOnychomycosisNotes = v.findViewById(R.id.etLeftOnychomycosisNotes)
+        etLeftOnychocryptosisNotes = v.findViewById(R.id.etLeftOnychocryptosisNotes)
+        etLeftNailStatusNotes = v.findViewById(R.id.etLeftNailStatusNotes)
+
+        return v
     }
 
     override fun prefill(history: PatientHistory?) {
-        history ?: return
+        if (history == null) return
         cbLeftHyperkeratosis.isChecked = history.leftHyperkeratosis
         cbLeftHalluxValgus.isChecked = history.leftHalluxValgus
         cbLeftWarts.isChecked = history.leftWarts
         cbLeftDermatophytosis.isChecked = history.leftDermatophytosis
 
-        etLeftDorsalCalluses.setText(history.leftDorsalCallusesNotes ?: "")
-        etLeftInterdigitalCalluses.setText(history.leftInterdigitalCallusesNotes ?: "")
-        etLeftPlantarCalluses.setText(history.leftPlantarCallusesNotes ?: "")
-        etLeftHammerToe.setText(history.leftHammerToeNotes ?: "")
-        etLeftOnychomycosis.setText(history.leftOnychomycosisNotes ?: "")
-        etLeftOnychocryptosis.setText(history.leftOnychocryptosisNotes ?: "")
-        etLeftNailStatus.setText(history.leftNailStatusNotes ?: "")
+        cbCornDorsalLeft.isChecked = history.cornDorsalLeft
+        cbCornPlantarLeft.isChecked = history.cornPlantarLeft
+
+        etLeftDorsalCallusesNotes.setText(history.leftDorsalCallusesNotes ?: "")
+        etLeftInterdigitalCallusesNotes.setText(history.leftInterdigitalCallusesNotes ?: "")
+        etLeftPlantarCallusesNotes.setText(history.leftPlantarCallusesNotes ?: "")
+        etLeftHammerToeNotes.setText(history.leftHammerToeNotes ?: "")
+        etLeftOnychomycosisNotes.setText(history.leftOnychomycosisNotes ?: "")
+        etLeftOnychocryptosisNotes.setText(history.leftOnychocryptosisNotes ?: "")
+        etLeftNailStatusNotes.setText(history.leftNailStatusNotes ?: "")
     }
 
     override fun collectInto(aggr: PatientHistoryAggregator) {
@@ -66,12 +75,15 @@ class HistoryLeftFootFragment : Fragment(), HistorySection {
         aggr.leftWarts = cbLeftWarts.isChecked
         aggr.leftDermatophytosis = cbLeftDermatophytosis.isChecked
 
-        aggr.leftDorsalCallusesNotes = etLeftDorsalCalluses.text.toString().trim().ifEmpty { null }
-        aggr.leftInterdigitalCallusesNotes = etLeftInterdigitalCalluses.text.toString().trim().ifEmpty { null }
-        aggr.leftPlantarCallusesNotes = etLeftPlantarCalluses.text.toString().trim().ifEmpty { null }
-        aggr.leftHammerToeNotes = etLeftHammerToe.text.toString().trim().ifEmpty { null }
-        aggr.leftOnychomycosisNotes = etLeftOnychomycosis.text.toString().trim().ifEmpty { null }
-        aggr.leftOnychocryptosisNotes = etLeftOnychocryptosis.text.toString().trim().ifEmpty { null }
-        aggr.leftNailStatusNotes = etLeftNailStatus.text.toString().trim().ifEmpty { null }
+        aggr.cornDorsalLeft = cbCornDorsalLeft.isChecked
+        aggr.cornPlantarLeft = cbCornPlantarLeft.isChecked
+
+        aggr.leftDorsalCallusesNotes = etLeftDorsalCallusesNotes.text?.toString()
+        aggr.leftInterdigitalCallusesNotes = etLeftInterdigitalCallusesNotes.text?.toString()
+        aggr.leftPlantarCallusesNotes = etLeftPlantarCallusesNotes.text?.toString()
+        aggr.leftHammerToeNotes = etLeftHammerToeNotes.text?.toString()
+        aggr.leftOnychomycosisNotes = etLeftOnychomycosisNotes.text?.toString()
+        aggr.leftOnychocryptosisNotes = etLeftOnychocryptosisNotes.text?.toString()
+        aggr.leftNailStatusNotes = etLeftNailStatusNotes.text?.toString()
     }
 }

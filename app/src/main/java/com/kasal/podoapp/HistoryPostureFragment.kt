@@ -11,7 +11,10 @@ import com.kasal.podoapp.data.PatientHistory
 
 class HistoryPostureFragment : Fragment(), HistorySection {
 
-    private lateinit var cbMetatarsalDrop: CheckBox
+    private lateinit var cbMetatarsalDrop: CheckBox // legacy συνολικό
+    private lateinit var cbMetatarsalDropLeft: CheckBox // ΝΕΟ
+    private lateinit var cbMetatarsalDropRight: CheckBox // ΝΕΟ
+
     private lateinit var cbValgus: CheckBox
     private lateinit var cbVarus: CheckBox
     private lateinit var cbEquinus: CheckBox
@@ -20,12 +23,12 @@ class HistoryPostureFragment : Fragment(), HistorySection {
     private lateinit var cbPronation: CheckBox
     private lateinit var cbSupination: CheckBox
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_history_posture, container, false)
-    }
-
-    override fun onViewCreated(v: View, savedInstanceState: Bundle?) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val v = inflater.inflate(R.layout.fragment_history_posture, container, false)
         cbMetatarsalDrop = v.findViewById(R.id.cbMetatarsalDrop)
+        cbMetatarsalDropLeft = v.findViewById(R.id.cbMetatarsalDropLeft)
+        cbMetatarsalDropRight = v.findViewById(R.id.cbMetatarsalDropRight)
+
         cbValgus = v.findViewById(R.id.cbValgus)
         cbVarus = v.findViewById(R.id.cbVarus)
         cbEquinus = v.findViewById(R.id.cbEquinus)
@@ -33,11 +36,31 @@ class HistoryPostureFragment : Fragment(), HistorySection {
         cbFlatfoot = v.findViewById(R.id.cbFlatfoot)
         cbPronation = v.findViewById(R.id.cbPronation)
         cbSupination = v.findViewById(R.id.cbSupination)
+
+        // sync κανόνες:
+        cbMetatarsalDropLeft.setOnCheckedChangeListener { _, _ -> syncMeta() }
+        cbMetatarsalDropRight.setOnCheckedChangeListener { _, _ -> syncMeta() }
+        cbMetatarsalDrop.setOnCheckedChangeListener { _, checked ->
+            // Αν ξετικαριστεί το συνολικό, απο-επιλέγουμε L/R (δεν είναι υποχρεωτικό αλλά κρατά UI καθαρό)
+            if (!checked) {
+                cbMetatarsalDropLeft.isChecked = false
+                cbMetatarsalDropRight.isChecked = false
+            }
+        }
+        return v
+    }
+
+    private fun syncMeta() {
+        // Το συνολικό γίνεται true αν κάποιο από L/R είναι true
+        cbMetatarsalDrop.isChecked = cbMetatarsalDropLeft.isChecked || cbMetatarsalDropRight.isChecked
     }
 
     override fun prefill(history: PatientHistory?) {
-        history ?: return
+        if (history == null) return
         cbMetatarsalDrop.isChecked = history.metatarsalDrop
+        cbMetatarsalDropLeft.isChecked = history.metatarsalDropLeft
+        cbMetatarsalDropRight.isChecked = history.metatarsalDropRight
+
         cbValgus.isChecked = history.valgus
         cbVarus.isChecked = history.varus
         cbEquinus.isChecked = history.equinus
@@ -45,10 +68,16 @@ class HistoryPostureFragment : Fragment(), HistorySection {
         cbFlatfoot.isChecked = history.flatfoot
         cbPronation.isChecked = history.pronation
         cbSupination.isChecked = history.supination
+
+        // Επανυπολογισμός ώστε να ταιριάξει η λογική
+        syncMeta()
     }
 
     override fun collectInto(aggr: PatientHistoryAggregator) {
         aggr.metatarsalDrop = cbMetatarsalDrop.isChecked
+        aggr.metatarsalDropLeft = cbMetatarsalDropLeft.isChecked
+        aggr.metatarsalDropRight = cbMetatarsalDropRight.isChecked
+
         aggr.valgus = cbValgus.isChecked
         aggr.varus = cbVarus.isChecked
         aggr.equinus = cbEquinus.isChecked
