@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.kasal.podoapp.R
 import com.kasal.podoapp.data.PatientHistory
@@ -27,7 +26,7 @@ class HistoryMedicalFragment : Fragment(), HistorySection {
     private lateinit var switchHasOtherConditions: Switch
     private lateinit var etOtherConditionsNotes: EditText
     private lateinit var etAnticoagulantsNotes: EditText
-    private lateinit var etContagiousDiseasesNotes: EditText
+    private lateinit var etContagiousNotes: EditText
 
     private val diabeticTypes = arrayOf("—", "TYPE_1", "TYPE_2")
 
@@ -55,7 +54,7 @@ class HistoryMedicalFragment : Fragment(), HistorySection {
         switchHasOtherConditions = v.findViewById(R.id.switchHasOtherConditions)
         etOtherConditionsNotes = v.findViewById(R.id.etOtherConditionsNotes)
         etAnticoagulantsNotes = v.findViewById(R.id.etAnticoagulantsNotes)
-        etContagiousDiseasesNotes = v.findViewById(R.id.etContagiousNotes)
+        etContagiousNotes = v.findViewById(R.id.etContagiousNotes)
     }
 
     private fun setupSpinner() {
@@ -73,7 +72,7 @@ class HistoryMedicalFragment : Fragment(), HistorySection {
         switchHasOtherConditions.setOnCheckedChangeListener { _, checked ->
             enableOtherConditions(checked)
         }
-        // αρχικό state
+        // default state
         enableDiabetes(false)
         enableOtherConditions(false)
     }
@@ -117,7 +116,7 @@ class HistoryMedicalFragment : Fragment(), HistorySection {
         switchHasOtherConditions.isChecked = history.hasOtherConditions
         etOtherConditionsNotes.setText(history.otherConditionsNotes ?: "")
         etAnticoagulantsNotes.setText(history.anticoagulantsNotes ?: "")
-        etContagiousDiseasesNotes.setText(history.contagiousDiseasesNotes ?: "")
+        etContagiousNotes.setText(history.contagiousDiseasesNotes ?: "")
         enableOtherConditions(history.hasOtherConditions)
     }
 
@@ -138,6 +137,6 @@ class HistoryMedicalFragment : Fragment(), HistorySection {
         aggr.hasOtherConditions = switchHasOtherConditions.isChecked
         aggr.otherConditionsNotes = etOtherConditionsNotes.text?.toString()
         aggr.anticoagulantsNotes = etAnticoagulantsNotes.text?.toString()
-        aggr.contagiousDiseasesNotes = etContagiousDiseasesNotes.text?.toString()
+        aggr.contagiousDiseasesNotes = etContagiousNotes.text?.toString()
     }
 }

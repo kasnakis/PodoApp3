@@ -47,7 +47,7 @@ class HistoryOrthoticsFragment : Fragment(), HistorySection {
         etSplintNotes.isEnabled = enabled
         if (!enabled) {
             etSplintType.setText("")
-            // Μπορείς να μην καθαρίζεις notes αν θέλεις να μείνουν ως ιστορικό
+            // Αν θες και notes clear:
             // etSplintNotes.setText("")
         }
     }

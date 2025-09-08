@@ -9,13 +9,12 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kasal.podoapp.R
-import com.kasal.podoapp.data.Patient
 import com.kasal.podoapp.data.PatientHistory
 import com.kasal.podoapp.data.PodologiaDatabase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.flow.collectLatest // Προσθήκη του import
 
 class PatientHistoryTabsActivity : AppCompatActivity() {
 
@@ -40,25 +39,21 @@ class PatientHistoryTabsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_patient_history_tabs)
 
-        // ΝΕΟ (safe):
-        val patientId = intent.getIntExtra("patientId", -1)
-        if (patientId <= 0) {
+        val pid = intent.getIntExtra("patientId", -1)
+        if (pid <= 0) {
             Toast.makeText(this, "Άκυρο patientId", Toast.LENGTH_LONG).show()
             finish(); return
         }
-        this.patientId = patientId
+        this.patientId = pid
 
-
-        // Views
         tabLayout = findViewById(R.id.tabLayout)
         viewPager = findViewById(R.id.viewPager)
         btnSave = findViewById(R.id.btnSaveAll)
 
-        // Adapter για τα tabs
         pagerAdapter = PatientHistoryPagerAdapter(this)
         viewPager.adapter = pagerAdapter
+        viewPager.offscreenPageLimit = 6
 
-        // Tab titles
         TabLayoutMediator(tabLayout, viewPager) { tab, pos ->
             tab.text = tabTitles[pos]
         }.attach()
@@ -66,26 +61,27 @@ class PatientHistoryTabsActivity : AppCompatActivity() {
         // Prefill αν υπάρχει ήδη ιστορικό
         lifecycleScope.launch {
             val db = PodologiaDatabase.getDatabase(this@PatientHistoryTabsActivity)
-            // Αλλαγή: χρήση του collectLatest με ρητό τύπο
             db.patientHistoryDao()
                 .observeByPatientId(patientId)
                 .collectLatest { history: PatientHistory? ->
                     existingHistory = history
-                    pagerAdapter.prefillAll(existingHistory)
+                    prefillAllTabs(existingHistory)
                 }
         }
 
-        // Αποθήκευση όλων των tabs
         btnSave.setOnClickListener { saveAll() }
     }
 
     private fun saveAll() {
-        // Συλλογή όλων των πεδίων από τα fragments
         val aggregator = PatientHistoryAggregator(patientId, existingHistory)
-        pagerAdapter.collectAllInto(aggregator)
+
+        // Συλλογή δεδομένων από όλα τα fragments μέσω του interface
+        supportFragmentManager.fragments.forEach { f ->
+            (f as? HistorySection)?.collectInto(aggregator)
+        }
+
         val toSave = aggregator.build()
 
-        // Upsert στη βάση
         lifecycleScope.launch(Dispatchers.IO) {
             val db = PodologiaDatabase.getDatabase(this@PatientHistoryTabsActivity)
             db.patientHistoryDao().upsert(toSave)
@@ -96,6 +92,14 @@ class PatientHistoryTabsActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
                 finish()
+            }
+        }
+    }
+
+    private fun prefillAllTabs(existing: PatientHistory?) {
+        viewPager.post {
+            supportFragmentManager.fragments.forEach { f ->
+                (f as? HistorySection)?.prefill(existing)
             }
         }
     }

@@ -9,13 +9,15 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PatientHistoryDao {
 
-    // Προσοχή στο tableName: "patient_history"
-    @Query("SELECT * FROM patient_history WHERE patientId = :patientId LIMIT 1")
-    fun observeByPatientId(patientId: Int): Flow<PatientHistory?>
-
     @Query("SELECT * FROM patient_history WHERE patientId = :patientId LIMIT 1")
     suspend fun getByPatientId(patientId: Int): PatientHistory?
 
+    @Query("SELECT * FROM patient_history WHERE patientId = :patientId LIMIT 1")
+    fun observeByPatientId(patientId: Int): Flow<PatientHistory?>
+
+    /**
+     * Upsert μέσω REPLACE: λόγω unique index στο patientId, θα αντικατασταθεί η εγγραφή.
+     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(history: PatientHistory): Long
 }

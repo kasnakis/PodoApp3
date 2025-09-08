@@ -13,6 +13,7 @@
     <string name="hint_phone">Τηλέφωνο</string>
     <string name="hint_notes">Σημειώσεις</string>
     <string name="button_save">Αποθήκευση</string>
+    <string name="save">Αποθήκευση</string>
 
     <!-- Λίστα πελατών -->
     <string name="patients_list_title">Πελατολόγιο</string>

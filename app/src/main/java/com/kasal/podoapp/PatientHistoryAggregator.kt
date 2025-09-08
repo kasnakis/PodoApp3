@@ -5,11 +5,6 @@ import com.kasal.podoapp.data.PatientHistory
 /**
  * Συγκεντρώνει όλα τα πεδία του PatientHistory από τα tabs
  * και παράγει ένα PatientHistory για upsert.
- *
- * Προσοχή: κρατάμε συμβατότητα με το υφιστάμενο save flow:
- *   val aggr = PatientHistoryAggregator(patientId, existingHistory)
- *   pagerAdapter.collectAllInto(aggr)
- *   val toSave = aggr.build()
  */
 class PatientHistoryAggregator(
     private val patientId: Int,
@@ -25,21 +20,21 @@ class PatientHistoryAggregator(
     // Διαβήτης
     var isDiabetic: Boolean = existing?.isDiabetic ?: false
     var diabeticType: String? = existing?.diabeticType // "TYPE_1" | "TYPE_2" | null
-    var diabetesSinceNotes: String? = existing?.diabetesSinceNotes // ΝΕΟ
+    var diabetesSinceNotes: String? = existing?.diabetesSinceNotes
     var insulinNotes: String? = existing?.insulinNotes
     var pillsNotes: String? = existing?.pillsNotes
 
     // Άλλες παθήσεις / Αντιπηκτικά / Μεταδοτικά
     var otherConditions: String? = existing?.otherConditions // legacy (κρατιέται)
-    var hasOtherConditions: Boolean = existing?.hasOtherConditions ?: false // ΝΕΟ
-    var otherConditionsNotes: String? = existing?.otherConditionsNotes // ΝΕΟ
+    var hasOtherConditions: Boolean = existing?.hasOtherConditions ?: false
+    var otherConditionsNotes: String? = existing?.otherConditionsNotes
     var anticoagulantsNotes: String? = existing?.anticoagulantsNotes
     var contagiousDiseasesNotes: String? = existing?.contagiousDiseasesNotes
 
     // --- Στάση / Παραμορφώσεις ---
     var metatarsalDrop: Boolean = existing?.metatarsalDrop ?: false // legacy συνολικό
-    var metatarsalDropLeft: Boolean = existing?.metatarsalDropLeft ?: false // ΝΕΟ
-    var metatarsalDropRight: Boolean = existing?.metatarsalDropRight ?: false // ΝΕΟ
+    var metatarsalDropLeft: Boolean = existing?.metatarsalDropLeft ?: false
+    var metatarsalDropRight: Boolean = existing?.metatarsalDropRight ?: false
 
     var valgus: Boolean = existing?.valgus ?: false
     var varus: Boolean = existing?.varus ?: false
@@ -55,11 +50,11 @@ class PatientHistoryAggregator(
     var leftWarts: Boolean = existing?.leftWarts ?: false
     var leftDermatophytosis: Boolean = existing?.leftDermatophytosis ?: false
 
-    // Κάλοι – ΝΕΑ booleans
+    // Κάλοι – Νέα booleans
     var cornDorsalLeft: Boolean = existing?.cornDorsalLeft ?: false
     var cornPlantarLeft: Boolean = existing?.cornPlantarLeft ?: false
 
-    // notes (ήδη υπήρχαν)
+    // notes
     var leftDorsalCallusesNotes: String? = existing?.leftDorsalCallusesNotes
     var leftInterdigitalCallusesNotes: String? = existing?.leftInterdigitalCallusesNotes
     var leftPlantarCallusesNotes: String? = existing?.leftPlantarCallusesNotes
@@ -74,7 +69,7 @@ class PatientHistoryAggregator(
     var rightWarts: Boolean = existing?.rightWarts ?: false
     var rightDermatophytosis: Boolean = existing?.rightDermatophytosis ?: false
 
-    // Κάλοι – ΝΕΑ booleans
+    // Κάλοι – Νέα booleans
     var cornDorsalRight: Boolean = existing?.cornDorsalRight ?: false
     var cornPlantarRight: Boolean = existing?.cornPlantarRight ?: false
 
@@ -87,7 +82,7 @@ class PatientHistoryAggregator(
     var rightOnychocryptosisNotes: String? = existing?.rightOnychocryptosisNotes
     var rightNailStatusNotes: String? = existing?.rightNailStatusNotes
 
-    // --- Οίδημα & Κιρσοί (μένουν ως είχαν) ---
+    // --- Οίδημα & Κιρσοί ---
     var edemaLeft: Boolean = existing?.edemaLeft ?: false
     var edemaRight: Boolean = existing?.edemaRight ?: false
     var varicoseDorsalLeft: Boolean = existing?.varicoseDorsalLeft ?: false
@@ -96,16 +91,16 @@ class PatientHistoryAggregator(
     var varicosePlantarRight: Boolean = existing?.varicosePlantarRight ?: false
 
     // --- Ορθωτικά / Νάρθηκας ---
-    var hasSplint: Boolean = existing?.hasSplint ?: false // ΝΕΟ
-    var splintType: String? = existing?.splintType // ΝΕΟ
-    var splintNotes: String? = existing?.splintNotes // legacy notes
+    var hasSplint: Boolean = existing?.hasSplint ?: false
+    var splintType: String? = existing?.splintType
+    var splintNotes: String? = existing?.splintNotes
 
     var orthoticType: String? = existing?.orthoticType // "NONE"|"STOCK"|"CUSTOM"|null
-    var orthoticNumber: String? = existing?.orthoticNumber // ΝΕΟ
-    var orthoticNotes: String? = existing?.orthoticNotes // ΝΕΟ
+    var orthoticNumber: String? = existing?.orthoticNumber
+    var orthoticNotes: String? = existing?.orthoticNotes
 
     fun build(): PatientHistory {
-        // Basic sync κανόνες (UX/validation light):
+        // Basic sync
         if (!isDiabetic) {
             diabeticType = null
             diabetesSinceNotes = null
@@ -114,16 +109,15 @@ class PatientHistoryAggregator(
         }
         if (!hasOtherConditions) otherConditionsNotes = null
 
-        // Αν έχει τσεκαριστεί L/R => σημαδεύουμε και το συνολικό legacy
+        // legacy συνολικό = OR των L/R
         metatarsalDrop = metatarsalDrop || metatarsalDropLeft || metatarsalDropRight
 
         if (!hasSplint) {
             splintType = null
         }
         if (orthoticType == "NONE") {
-            // Προαιρετικός καθαρισμός για καθαρά δεδομένα
-            // orthoticNotes = null
             orthoticNumber = null
+            // orthoticNotes = null // αν θέλεις καθάρισμα, ξεκλείδωσε
         }
 
         return PatientHistory(

@@ -17,8 +17,8 @@ class HistoryRightFootFragment : Fragment(), HistorySection {
     private lateinit var cbRightWarts: CheckBox
     private lateinit var cbRightDermatophytosis: CheckBox
 
-    private lateinit var cbCornDorsalRight: CheckBox // ΝΕΟ
-    private lateinit var cbCornPlantarRight: CheckBox // ΝΕΟ
+    private lateinit var cbCornDorsalRight: CheckBox
+    private lateinit var cbCornPlantarRight: CheckBox
 
     private lateinit var etRightDorsalCallusesNotes: EditText
     private lateinit var etRightInterdigitalCallusesNotes: EditText

@@ -5,9 +5,8 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Αναμνηστικό (PatientHistory) – one-to-one με Patient.
- * Σημείωση: Κρατάμε τα υπάρχοντα πεδία για συμβατότητα και
- * προσθέτουμε νέα ώστε να καλύψουμε το agreed spec.
+ * Ένα (unique) ιστορικό ανά patientId.
+ * Το unique index στο patientId μας επιτρέπει REPLACE στο insert.
  */
 @Entity(
     tableName = "patient_history",
@@ -17,7 +16,7 @@ data class PatientHistory(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val patientId: Int,
 
-    // --- Ιατρικά / Στοιχεία Ιατρών & Αγωγής ---
+    // --- Στοιχεία Ιατρών & Αγωγής ---
     val doctorName: String? = null,
     val doctorPhone: String? = null,
     val doctorDiagnosis: String? = null,
@@ -26,27 +25,21 @@ data class PatientHistory(
 
     // Διαβήτης
     val isDiabetic: Boolean = false,
-    /** "TYPE_1" | "TYPE_2" (ή null) */
+    /** "TYPE_1" | "TYPE_2" */
     val diabeticType: String? = null,
-    /** ΝΕΟ: Από πότε / σχόλια (free text) */
     val diabetesSinceNotes: String? = null,
     val insulinNotes: String? = null,
     val pillsNotes: String? = null,
 
-    // Άλλες παθήσεις / Αντιπηκτικά / Μεταδοτικά
-    /** ΠΑΛΙΟ: ελεύθερο κείμενο. Θα αντικατασταθεί σταδιακά από hasOtherConditions + otherConditionsNotes */
-    val otherConditions: String? = null,
-    /** ΝΕΟ: flag ύπαρξης λοιπών παθήσεων */
+    // Άλλες παθήσεις / legacy
+    val otherConditions: String? = null,       // (κρατιέται αν υπήρχε)
     val hasOtherConditions: Boolean = false,
-    /** ΝΕΟ: σημειώσεις για λοιπές παθήσεις */
     val otherConditionsNotes: String? = null,
     val anticoagulantsNotes: String? = null,
     val contagiousDiseasesNotes: String? = null,
 
-    // --- Στάση / Παραμορφώσεις ---
-    /** ΠΑΛΙΟ: συνολικό flag. Θα παραμείνει για συμβατότητα */
-    val metatarsalDrop: Boolean = false,
-    /** ΝΕΟ: αριστερό/δεξί */
+    // --- Πτώση μεταταρσίων / Παραμορφώσεις ---
+    val metatarsalDrop: Boolean = false,       // συνολικό (legacy)
     val metatarsalDropLeft: Boolean = false,
     val metatarsalDropRight: Boolean = false,
 
@@ -55,7 +48,6 @@ data class PatientHistory(
     val equinus: Boolean = false,
     val cavus: Boolean = false,
     val flatfoot: Boolean = false,
-    // Προαιρετικά – υπάρχουν ήδη
     val pronation: Boolean = false,
     val supination: Boolean = false,
 
@@ -65,11 +57,11 @@ data class PatientHistory(
     val leftWarts: Boolean = false,
     val leftDermatophytosis: Boolean = false,
 
-    /** ΝΕΟ: boolean παρουσίας κάλων (ράχης/πέλματος) */
+    // Κάλοι (booleans)
     val cornDorsalLeft: Boolean = false,
     val cornPlantarLeft: Boolean = false,
 
-    // υπάρχοντα notes
+    // Notes (αριστερό)
     val leftDorsalCallusesNotes: String? = null,
     val leftInterdigitalCallusesNotes: String? = null,
     val leftPlantarCallusesNotes: String? = null,
@@ -84,11 +76,11 @@ data class PatientHistory(
     val rightWarts: Boolean = false,
     val rightDermatophytosis: Boolean = false,
 
-    /** ΝΕΟ: boolean παρουσίας κάλων (ράχης/πέλματος) */
+    // Κάλοι (booleans)
     val cornDorsalRight: Boolean = false,
     val cornPlantarRight: Boolean = false,
 
-    // υπάρχοντα notes
+    // Notes (δεξί)
     val rightDorsalCallusesNotes: String? = null,
     val rightInterdigitalCallusesNotes: String? = null,
     val rightPlantarCallusesNotes: String? = null,
@@ -106,17 +98,12 @@ data class PatientHistory(
     val varicosePlantarRight: Boolean = false,
 
     // --- Ορθωτικά / Νάρθηκας ---
-    /** ΝΕΟ: ύπαρξη νάρθηκα; */
     val hasSplint: Boolean = false,
-    /** ΝΕΟ: τύπος νάρθηκα / σχόλια */
     val splintType: String? = null,
-    /** ΠΑΛΙΟ: κρατιέται ως επιπλέον πεδίο σχολίων */
     val splintNotes: String? = null,
 
-    /** Τύπος ορθωτικών: "NONE" | "STOCK" | "CUSTOM" */
+    /** "NONE" | "STOCK" | "CUSTOM" */
     val orthoticType: String? = null,
-    /** ΝΕΟ: αριθμός/κωδικός πάτων */
     val orthoticNumber: String? = null,
-    /** ΝΕΟ: σημειώσεις ορθωτικών */
     val orthoticNotes: String? = null
 )

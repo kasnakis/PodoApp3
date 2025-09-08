@@ -14,6 +14,7 @@ import com.kasal.podoapp.data.PatientDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.kasal.podoapp.ui.PatientDetailActivity
 
 class PatientAdapter(
     private var patients: MutableList<Patient>,

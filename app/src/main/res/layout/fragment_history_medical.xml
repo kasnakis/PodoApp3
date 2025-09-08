@@ -52,7 +52,9 @@
             android:hint="Αλλεργίες" />
 
         <!-- Διαβήτης -->
-        <View android:layout_width="match_parent" android:layout_height="12dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="12dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -92,7 +94,9 @@
             android:hint="Χάπια (σημειώσεις)" />
 
         <!-- Άλλες παθήσεις / Αντιπηκτικά / Μεταδοτικά -->
-        <View android:layout_width="match_parent" android:layout_height="12dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="12dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -125,5 +129,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Μεταδοτικές ασθένειες (σημειώσεις)" />
+
     </LinearLayout>
 </ScrollView>

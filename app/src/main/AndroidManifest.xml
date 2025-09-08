@@ -41,6 +41,10 @@
 
         <activity android:name=".ui.VisitDetailActivity" android:exported="false" />
 
+        <activity
+            android:name=".ui.PatientHistoryTabsActivity"
+            android:exported="false" />
+
         <activity android:name=".ui.FullscreenPhotoActivity" android:exported="false" />
 
     </application>

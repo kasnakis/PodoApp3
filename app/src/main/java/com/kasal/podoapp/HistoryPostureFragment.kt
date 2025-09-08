@@ -12,8 +12,8 @@ import com.kasal.podoapp.data.PatientHistory
 class HistoryPostureFragment : Fragment(), HistorySection {
 
     private lateinit var cbMetatarsalDrop: CheckBox // legacy συνολικό
-    private lateinit var cbMetatarsalDropLeft: CheckBox // ΝΕΟ
-    private lateinit var cbMetatarsalDropRight: CheckBox // ΝΕΟ
+    private lateinit var cbMetatarsalDropLeft: CheckBox
+    private lateinit var cbMetatarsalDropRight: CheckBox
 
     private lateinit var cbValgus: CheckBox
     private lateinit var cbVarus: CheckBox
@@ -37,11 +37,9 @@ class HistoryPostureFragment : Fragment(), HistorySection {
         cbPronation = v.findViewById(R.id.cbPronation)
         cbSupination = v.findViewById(R.id.cbSupination)
 
-        // sync κανόνες:
         cbMetatarsalDropLeft.setOnCheckedChangeListener { _, _ -> syncMeta() }
         cbMetatarsalDropRight.setOnCheckedChangeListener { _, _ -> syncMeta() }
         cbMetatarsalDrop.setOnCheckedChangeListener { _, checked ->
-            // Αν ξετικαριστεί το συνολικό, απο-επιλέγουμε L/R (δεν είναι υποχρεωτικό αλλά κρατά UI καθαρό)
             if (!checked) {
                 cbMetatarsalDropLeft.isChecked = false
                 cbMetatarsalDropRight.isChecked = false
@@ -51,7 +49,6 @@ class HistoryPostureFragment : Fragment(), HistorySection {
     }
 
     private fun syncMeta() {
-        // Το συνολικό γίνεται true αν κάποιο από L/R είναι true
         cbMetatarsalDrop.isChecked = cbMetatarsalDropLeft.isChecked || cbMetatarsalDropRight.isChecked
     }
 
@@ -69,7 +66,6 @@ class HistoryPostureFragment : Fragment(), HistorySection {
         cbPronation.isChecked = history.pronation
         cbSupination.isChecked = history.supination
 
-        // Επανυπολογισμός ώστε να ταιριάξει η λογική
         syncMeta()
     }
 
